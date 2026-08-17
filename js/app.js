@@ -174,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
       a.click();
       document.body.removeChild(a);
     }).catch(() => {
-      // Fallback: Open Full 26-Page Booklet Print Window in Browser!
       openClientPDFPrintWindow(currentReportData);
     }).finally(() => {
       showLoading(false);
@@ -477,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * FULL 26-PAGE OFFICIAL BOOKLET CLIENT-SIDE PRINT WINDOW ENGINE FOR GITHUB PAGES
+   * FULL 26-PAGE OFFICIAL BOOKLET CLIENT-SIDE PRINT WINDOW ENGINE WITH DYNAMIC HISTORICAL MONTHS TABLE
    */
   function openClientPDFPrintWindow(data) {
     const printWin = window.open('', '_blank');
@@ -485,6 +484,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthBadgeText = thaiMonthYear.replace('ประจำเดือน', '').trim();
     const detectedMonth = data.metadata.detectedMonth || '2025-09';
     const [yearStr, monthStr] = detectedMonth.split('-');
+
+    // --- Dynamic Historical Months Table Data (มิ.ย. - ธ.ค. 2568) ---
+    const monthKeys = ['มิ.ย', 'ก.ค', 'ส.ค', 'ก.ย', 'ต.ค', 'พ.ย', 'ธ.ค'];
+    const monthNumMap = { 6: 'มิ.ย', 7: 'ก.ค', 8: 'ส.ค', 9: 'ก.ย', 10: 'ต.ค', 11: 'พ.ย', 12: 'ธ.ค' };
+
+    const historicalTableData = {
+      'มิ.ย': { device: 83, voucher: 43, data: 729 },
+      'ก.ค': { device: 114, voucher: 40, data: 1530 },
+      'ส.ค': { device: 28, voucher: 5, data: 580 },
+      'ก.ย': { device: 36, voucher: 15, data: 684 },
+      'ต.ค': { device: 42, voucher: 15, data: 655 },
+      'พ.ย': { device: '-', voucher: '-', data: '-' },
+      'ธ.ค': { device: '-', voucher: '-', data: '-' }
+    };
+
+    const currentMonthNum = parseInt(monthStr, 10);
+    const currentMonthKey = monthNumMap[currentMonthNum];
+
+    if (currentMonthKey && historicalTableData[currentMonthKey]) {
+      historicalTableData[currentMonthKey] = {
+        device: data.summary.uniqueUsers || 30,
+        voucher: data.summary.totalVouchers || 15,
+        data: Math.round(data.summary.totalGB || 525)
+      };
+    }
 
     const uniqueVouchers = Array.from(new Set(data.vouchers.map(v => String(v.voucherCode).padStart(8, '0'))));
     const uniqueClients = Array.from(new Set(data.clientList.map(c => c.mac)));
@@ -702,7 +726,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
 
-        <!-- PAGE 2: SUMMARY -->
+        <!-- PAGE 2: SUMMARY WITH DYNAMIC HISTORICAL MONTHS TABLE -->
         <div class="page page-content">
           <div class="page-header-title">การใช้งาน NRO-GuestWiFi ประจำเดือน ${monthBadgeText}</div>
           <div class="chart-container-p2"><canvas id="p2BarChart"></canvas></div>
@@ -714,13 +738,16 @@ document.addEventListener('DOMContentLoaded', () => {
               <tr><td style="font-weight: 700;">Voucher</td>${dailyVouchers.map(v => `<td>${v}</td>`).join('')}</tr>
             </tbody>
           </table>
+
           <div style="font-size: 11px; font-weight: 700; margin-bottom: 4px; margin-top: 20px;">การใช้งาน NRO-GuestWiFi ปี 2568</div>
           <table class="custom-table" style="width: 65%;">
-            <thead><tr><th>เดือน</th><th>มิ.ย</th><th>ก.ค</th><th>ส.ค</th><th>ก.ย</th><th>ต.ค</th><th>พ.ย</th><th>ธ.ค</th></tr></thead>
+            <thead>
+              <tr><th>เดือน</th>${monthKeys.map(mk => `<th>${mk}</th>`).join('')}</tr>
+            </thead>
             <tbody>
-              <tr><td style="font-weight: 700;">Device</td><td>83</td><td>114</td><td>28</td><td>36</td><td>42</td><td>-</td><td>-</td></tr>
-              <tr><td style="font-weight: 700;">Voucher</td><td>43</td><td>40</td><td>5</td><td>15</td><td>15</td><td>-</td><td>-</td></tr>
-              <tr><td style="font-weight: 700;">Data (Gb)</td><td>729</td><td>1530</td><td>580</td><td>684</td><td>655</td><td>-</td><td>-</td></tr>
+              <tr><td style="font-weight: 700;">Device</td>${monthKeys.map(mk => `<td>${historicalTableData[mk].device}</td>`).join('')}</tr>
+              <tr><td style="font-weight: 700;">Voucher</td>${monthKeys.map(mk => `<td>${historicalTableData[mk].voucher}</td>`).join('')}</tr>
+              <tr><td style="font-weight: 700;">Data (Gb)</td>${monthKeys.map(mk => `<td>${historicalTableData[mk].data}</td>`).join('')}</tr>
             </tbody>
           </table>
           <div class="footer-logo">${logoImgTagFooter}</div>
