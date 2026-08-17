@@ -5,7 +5,7 @@ const tnsLogoBase64 = require('./tnsLogoBase64');
 
 /**
  * Full Booklet PDF Generator Service for Bank of Thailand (BOT)
- * Computes dynamic metrics directly from parsed log data and active report summaries
+ * Enforces strict current day cutoff for active month (e.g. 17/8/2026)
  */
 class PDFService {
   /**
@@ -109,7 +109,6 @@ class PDFService {
     const monthKeys2569 = ['ม.ค', 'ก.พ', 'มี.ค', 'เม.ย', 'พ.ค', 'มิ.ย', 'ก.ค', 'ส.ค', 'ก.ย', 'ต.ค', 'พ.ย', 'ธ.ค'];
     const monthNumList2569 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-    // Dynamic historical baselines for 2569 months
     const baseData2569 = {
       1: { device: 32, voucher: 16, data: 636 },
       2: { device: 28, voucher: 14, data: 577 },
@@ -126,7 +125,6 @@ class PDFService {
       const keyStr = monthKeys2569[idx];
       if (isYear2569 && mNum <= currentMonthNum) {
         if (mNum === currentMonthNum) {
-          // Dynamic calculation directly from active log summary
           historicalTableData2569[keyStr] = {
             device: summary.uniqueUsers !== undefined ? summary.uniqueUsers : (baseData2569[mNum] ? baseData2569[mNum].device : 30),
             voucher: summary.totalVouchers !== undefined ? summary.totalVouchers : (baseData2569[mNum] ? baseData2569[mNum].voucher : 15),
@@ -136,7 +134,6 @@ class PDFService {
           historicalTableData2569[keyStr] = baseData2569[mNum] || { device: 30, voucher: 15, data: 600 };
         }
       } else {
-        // Future month in 2569 (after current month) -> Display dash (-)
         historicalTableData2569[keyStr] = { device: '-', voucher: '-', data: '-' };
       }
     });
@@ -145,9 +142,18 @@ class PDFService {
     const uniqueVouchers = Array.from(new Set(vouchers.map(v => String(v.voucherCode).padStart(8, '0'))));
     const uniqueClients = Array.from(new Set(clientList.map(c => c.mac)));
 
-    // Days 1..30/31
+    // Calculate maximum valid days for the month (cutoff at current day if current active month)
+    const now = new Date();
+    const currentYearToday = now.getFullYear();
+    const currentMonthToday = now.getMonth() + 1;
+    const currentDayToday = now.getDate();
+
+    const isCurrentActiveMonth = (currentYear === currentYearToday && currentMonthNum === currentMonthToday);
+
     const daysInMonth = new Date(currentYear, currentMonthNum, 0).getDate();
-    const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const maxDay = isCurrentActiveMonth ? Math.min(daysInMonth, currentDayToday) : daysInMonth;
+
+    const daysArray = Array.from({ length: maxDay }, (_, i) => i + 1);
 
     const dailyDevices = daysArray.map(d => {
       const dayStr = String(d).padStart(2, '0');
@@ -160,7 +166,7 @@ class PDFService {
       return vVal > 0 ? vVal : 1;
     });
 
-    // --- Build Grouped Audit Logs (Pages 5+) ---
+    // --- Build Grouped Audit Logs (Pages 5+) strictly up to maxDay ---
     const logDetailsList = [
       'captive portal logout (lease timeout)',
       'captive portal login.',
@@ -522,7 +528,7 @@ class PDFService {
       <canvas id="p2BarChart"></canvas>
     </div>
 
-    <!-- Daily Table -->
+    <!-- Daily Table (Cutoff at current day if current active month) -->
     <div style="font-size: 11px; font-weight: 700; margin-bottom: 4px;">การใช้งาน NRO-GuestWiFi ประจำเดือน ${monthBadgeText}</div>
     <table class="custom-table">
       <thead>
@@ -685,7 +691,7 @@ class PDFService {
   </div>
 
 
-  <!-- PAGES 5+: GROUPED ACCESS AUDIT LOGS -->
+  <!-- PAGES 5+: GROUPED ACCESS AUDIT LOGS (Cutoff strictly at maxDay e.g. 17th) -->
   ${auditPages.map((pageRows, pageIdx) => `
     <div class="page page-content">
       <div style="font-size: 12px; font-weight: 700; margin-bottom: 10px;">รายการรายละเอียดการเข้า-ออกระบบ (Access Audit Log) - หน้า ${pageIdx + 1}</div>

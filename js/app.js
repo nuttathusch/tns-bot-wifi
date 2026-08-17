@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const thaiYear = year + 543;
     const thaiMonthYear = `ประจำเดือน${thaiMonthNames[month - 1]} พ.ศ. ${thaiYear}`;
 
-    // Specific monthly totals provided by user screenshots (with dynamic user/voucher counts)
+    // Specific monthly totals provided by user screenshots
     const monthPresetMetrics = {
       '2026-01': { totalGB: 636.21, downloadGB: 534.42, uploadGB: 101.79, users: 32, vouchers: 16, peakDay: { date: '2026-01-09', totalGB: 33.86 } },
       '2026-02': { totalGB: 576.93, downloadGB: 484.62, uploadGB: 92.31, users: 28, vouchers: 14, peakDay: { date: '2026-02-08', totalGB: 33.15 } },
@@ -275,7 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const targetVoucherCount = preset ? preset.vouchers : 15;
     const targetUserCount = preset ? preset.users : 30;
-
     const selectedVoucherCodes = voucherCodes.slice(0, targetVoucherCount);
 
     const vouchers = selectedVoucherCodes.map((code, idx) => {
@@ -296,8 +295,17 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }).sort((a, b) => b.totalGB - a.totalGB);
 
+    // Dynamic current day cutoff for active month (e.g. 17/8/2026)
+    const now = new Date();
+    const currentYearToday = now.getFullYear();
+    const currentMonthToday = now.getMonth() + 1;
+    const currentDayToday = now.getDate();
+
+    const isCurrentActiveMonth = (year === currentYearToday && month === currentMonthToday);
     const totalDaysInMonth = new Date(year, month, 0).getDate();
-    const dailyTimeline = Array.from({ length: totalDaysInMonth }, (_, i) => {
+    const maxDay = isCurrentActiveMonth ? Math.min(totalDaysInMonth, currentDayToday) : totalDaysInMonth;
+
+    const dailyTimeline = Array.from({ length: maxDay }, (_, i) => {
       const dayStr = String(i + 1).padStart(2, '0');
       const gb = +((Math.random() * 28) + 6).toFixed(2);
       const users = Math.floor(Math.random() * 14) + 2;
@@ -354,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadGB: +((Math.random() * 5) + 0.3).toFixed(2),
         totalGB: +((Math.random() * 30) + 1.5).toFixed(2),
         firstConnected: `${year}-${String(month).padStart(2, '0')}-01 08:30:00`,
-        lastSeen: `${year}-${String(month).padStart(2, '0')}-${String((i % 25) + 1).padStart(2, '0')} 17:45:00`
+        lastSeen: `${year}-${String(month).padStart(2, '0')}-${String((i % Math.min(25, maxDay)) + 1).padStart(2, '0')} 17:45:00`
       };
     });
 
@@ -373,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadGB,
         uniqueUsers: clientList.length,
         totalVouchers: vouchers.length,
-        activeDaysCount: totalDaysInMonth,
+        activeDaysCount: maxDay,
         peakDay
       },
       vouchers,
@@ -498,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * FULL 26-PAGE OFFICIAL BOOKLET CLIENT-SIDE PRINT WINDOW ENGINE WITH DYNAMIC LOG COMPUTATION
+   * FULL 26-PAGE OFFICIAL BOOKLET CLIENT-SIDE PRINT WINDOW ENGINE WITH CURRENT DAY CUTOFF
    */
   function openClientPDFPrintWindow(data) {
     const printWin = window.open('', '_blank');
@@ -577,8 +585,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const uniqueVouchers = Array.from(new Set(data.vouchers.map(v => String(v.voucherCode).padStart(8, '0'))));
     const uniqueClients = Array.from(new Set(data.clientList.map(c => c.mac)));
 
+    // Calculate maximum valid days for the month (cutoff at current day if current active month)
+    const now = new Date();
+    const currentYearToday = now.getFullYear();
+    const currentMonthToday = now.getMonth() + 1;
+    const currentDayToday = now.getDate();
+
+    const isCurrentActiveMonth = (currentYear === currentYearToday && currentMonthNum === currentMonthToday);
+
     const daysInMonth = new Date(currentYear, currentMonthNum, 0).getDate();
-    const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const maxDay = isCurrentActiveMonth ? Math.min(daysInMonth, currentDayToday) : daysInMonth;
+
+    const daysArray = Array.from({ length: maxDay }, (_, i) => i + 1);
 
     const dailyDevices = daysArray.map(d => {
       const dayStr = String(d).padStart(2, '0');
@@ -591,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return vVal > 0 ? vVal : 1;
     });
 
-    // Build Grouped Audit Logs
+    // Build Grouped Audit Logs strictly up to maxDay
     const logDetailsList = [
       'captive portal logout (lease timeout)',
       'captive portal login.',
@@ -870,7 +888,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="footer-logo">${logoImgTagFooter}</div>
         </div>
 
-        <!-- PAGES 5+: GROUPED AUDIT LOGS -->
+        <!-- PAGES 5+: GROUPED ACCESS AUDIT LOGS -->
         ${auditPages.map((pageRows, pageIdx) => `
           <div class="page page-content">
             <div style="font-size: 12px; font-weight: 700; margin-bottom: 10px;">รายการรายละเอียดการเข้า-ออกระบบ (Access Audit Log) - หน้า ${pageIdx + 1}</div>
