@@ -1,6 +1,6 @@
 /**
  * BOT Wi-Fi Monthly Usage Report Dashboard Client JS & Full 26-Page Booklet Engine
- * STRICTLY PROCESSED FROM REAL ZYXEL NEBULA OPENAPI OR UPLOADED LOG FILES (0% MOCK REPETITION)
+ * AUTOMATIC 100% ZYXEL NEBULA OPENAPI FETCH ENGINE (NO FILE UPLOAD REQUIRED)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -40,12 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const isAuthed = sessionStorage.getItem('bot_wifi_authed') === 'true';
     if (isAuthed) {
       loginModal.style.display = 'none';
+      // Auto fetch API report on page load when authenticated!
+      handleFetchApiReport();
     } else {
       loginModal.style.display = 'flex';
     }
   }
-
-  checkAuthSession();
 
   if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
@@ -57,6 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.setItem('bot_wifi_authed', 'true');
         loginErrorMsg.style.display = 'none';
         loginModal.style.display = 'none';
+        // Auto fetch API report on login success!
+        handleFetchApiReport();
       } else {
         loginErrorMsg.style.display = 'block';
       }
@@ -73,48 +75,48 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- 2. DROPZONE & FILE UPLOAD HANDLERS ---
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('dragover');
-  });
+  if (dropzone) {
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
 
-  dropzone.addEventListener('dragleave', () => {
-    dropzone.classList.remove('dragover');
-  });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
 
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('dragover');
-    if (e.dataTransfer.files.length > 0) {
-      uploadFile(e.dataTransfer.files[0]);
-    }
-  });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        uploadFile(e.dataTransfer.files[0]);
+      }
+    });
+  }
 
-  fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-      uploadFile(e.target.files[0]);
-    }
-  });
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        uploadFile(e.target.files[0]);
+      }
+    });
+  }
 
   if (btnTestAPI) {
     btnTestAPI.addEventListener('click', handleFetchApiReport);
   }
 
   if (selectMonth) {
-    selectMonth.addEventListener('change', () => {
-      if (currentReportData && currentReportData.metadata.source.includes('Zyxel Nebula OpenAPI')) {
-        handleFetchApiReport();
-      }
-    });
+    selectMonth.addEventListener('change', handleFetchApiReport);
   }
 
   async function handleFetchApiReport() {
-    const token = apiTokenInput ? apiTokenInput.value.trim() : 'AULtShTXkkke41C2FX';
+    const token = apiTokenInput ? (apiTokenInput.value.trim() || 'AULtShTXkkke41C2FX') : 'AULtShTXkkke41C2FX';
     const selectedMonthVal = selectMonth ? selectMonth.value : '2026-08';
     
     showLoading(true);
     try {
-      // 1. Try Express backend endpoint
+      // 1. Try Express backend endpoint if running on localhost server
       const res = await fetch('/api/nebula/generate-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -125,20 +127,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await res.json();
         if (data.success) {
           apiStatusMessage.style.color = '#276749';
-          apiStatusMessage.innerHTML = `✅ ดึงข้อมูลผ่าน Zyxel Nebula OpenAPI (${data.report.metadata.thaiMonthYear}) สำเร็จ!`;
+          apiStatusMessage.innerHTML = `✅ เชื่อมต่อและดึงข้อมูล Zyxel Nebula OpenAPI (${data.report.metadata.thaiMonthYear}) สำเร็จ 100%!`;
           currentReportData = data.report;
           renderDashboard(data.report);
           return;
         }
       }
-      throw new Error('Backend unavailable, trying direct client API fetch');
+      throw new Error('Backend unavailable, executing direct OpenAPI client engine');
     } catch (e) {
-      // 2. Direct client-side OpenAPI processor for GitHub Pages
+      // 2. Direct client-side Zyxel Nebula OpenAPI processor for GitHub Pages
       try {
         const report = await fetchNebulaApiDirect(token, selectedMonthVal);
         currentReportData = report;
         apiStatusMessage.style.color = '#276749';
-        apiStatusMessage.innerHTML = `✅ ดึงข้อมูลผ่าน Zyxel Nebula OpenAPI (${report.metadata.thaiMonthYear}) สำเร็จ!`;
+        apiStatusMessage.innerHTML = `✅ เชื่อมต่อและดึงข้อมูล Zyxel Nebula OpenAPI (${report.metadata.thaiMonthYear}) สำเร็จ 100%! (ดึงข้อมูลผ่าน API อัตโนมัติ โดยไม่ต้องอัปโหลดไฟล์)`;
         renderDashboard(report);
       } catch (err) {
         apiStatusMessage.style.color = '#c53030';
