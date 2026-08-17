@@ -131,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         throw new Error('Fallback to Client-side Generation');
       } catch (e) {
-        // GitHub Pages Client-side fallback
         const clientReport = generateClientReportObject('Zyxel Nebula OpenAPI Direct', selectedMonthVal);
         apiStatusMessage.style.color = '#276749';
         apiStatusMessage.innerHTML = `✅ เชื่อมต่อ Zyxel Nebula API (${clientReport.metadata.thaiMonthYear}) สำเร็จ!`;
@@ -143,14 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Search filter
   searchVoucher.addEventListener('input', (e) => {
     if (currentReportData && currentReportData.vouchers) {
       renderVoucherTable(currentReportData.vouchers, e.target.value);
     }
   });
 
-  // Export handlers
   btnExportPDF.addEventListener('click', () => {
     if (!currentReportData) return;
     showLoading(true);
@@ -173,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
       a.click();
       document.body.removeChild(a);
     }).catch(() => {
-      // Client-side Print Booklet Window Fallback
       openClientPDFPrintWindow(currentReportData);
     }).finally(() => {
       showLoading(false);
@@ -186,9 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
     generateClientExcel(currentReportData).finally(() => showLoading(false));
   });
 
-  /**
-   * Upload File to Backend or Client Fallback
-   */
   async function uploadFile(file) {
     showLoading(true);
     const formData = new FormData();
@@ -217,9 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /**
-   * Load Sample Data
-   */
   async function loadSampleData() {
     showLoading(true);
     try {
@@ -242,9 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /**
-   * Generate Full Client-Side Report Object with Preserved Leading Zero Vouchers (06407109)
-   */
   function generateClientReportObject(sourceName, monthValStr = '2026-08') {
     const [yearStr, monthStr] = monthValStr.split('-');
     const year = parseInt(yearStr, 10) || 2026;
@@ -257,7 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const thaiYear = year + 543;
     const thaiMonthYear = `ประจำเดือน${thaiMonthNames[month - 1]} พ.ศ. ${thaiYear}`;
 
-    // Real Zyxel Voucher Codes with preserved leading zero (06407109)
     const voucherCodes = [
       '06407109', '08139526', '03674849', '05790829',
       '05416810', '04533800', '08893518', '03220482',
@@ -368,15 +354,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  /**
-   * Render Dashboard Metrics, Charts & Tables
-   */
   function renderDashboard(data) {
     dashboardSection.classList.remove('hidden');
 
     const { metadata, summary, vouchers, dailyTimeline, apBreakdown } = data;
 
-    // Header & KPIs
     reportMonthTag.textContent = metadata.thaiMonthYear || metadata.detectedMonth;
     kpiTotalGB.textContent = `${summary.totalGB} GB`;
     kpiDLUL.textContent = `DL: ${summary.downloadGB} GB | UL: ${summary.uploadGB} GB`;
@@ -386,15 +368,11 @@ document.addEventListener('DOMContentLoaded', () => {
     kpiPeakDayDate.textContent = summary.peakDay.date;
     kpiPeakDayGB.textContent = `การใช้งานรวม ${summary.peakDay.totalGB} GB`;
 
-    // Render Charts
     renderDailyTrendChart(dailyTimeline);
     renderAPChart(apBreakdown);
-
-    // Render Tables
     renderVoucherTable(vouchers, '');
     renderAPTable(apBreakdown);
 
-    // Scroll smoothly to dashboard
     dashboardSection.scrollIntoView({ behavior: 'smooth' });
   }
 
@@ -490,9 +468,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /**
-   * Client-Side Print Booklet Window for GitHub Pages
-   */
   function openClientPDFPrintWindow(data) {
     const printWin = window.open('', '_blank');
     const thaiMonthYear = data.metadata.thaiMonthYear || 'ประจำเดือนกันยายน พ.ศ. 2568';
@@ -519,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <p><strong>หน่วยงาน:</strong> ${data.metadata.siteName}</p>
         <p><strong>ปริมาณข้อมูลรวม:</strong> ${data.summary.totalGB} GB (Download: ${data.summary.downloadGB} GB | Upload: ${data.summary.uploadGB} GB)</p>
         
-        <h3>🎟️ รายการ Voucher ที่ใช้งานในเดือน ( preserving leading zero )</h3>
+        <h3>🎟️ รายการ Voucher ที่ใช้งานในเดือน</h3>
         <table>
           <thead>
             <tr><th>ลำดับ</th><th>Voucher Code</th><th>จำนวนผู้ใช้</th><th>ปริมาณรวม (GB)</th></tr>
@@ -545,9 +520,6 @@ document.addEventListener('DOMContentLoaded', () => {
     printWin.document.close();
   }
 
-  /**
-   * Client-Side Excel Export for GitHub Pages using ExcelJS CDN
-   */
   async function generateClientExcel(data) {
     if (typeof ExcelJS === 'undefined') {
       alert('กำลังโหลดสคริปต์ ExcelJS กรุณาลองใหม่อีกครั้ง');
