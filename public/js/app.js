@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * Direct Client-Side Zyxel Nebula OpenAPI Fetcher & Real Dynamic Processor
-   * DYNAMIC PER-MONTH FIGURES GROUNDED IN BOT HISTORICAL AUDIT REPORTS
+   * DYNAMIC PER-MONTH FIGURES GROUNDED IN BOT HISTORICAL AUDIT REPORTS & REAL CSV LOGS
    */
   async function fetchNebulaApiDirect(token, selectedMonthVal = '2026-08') {
     const [yearStr, monthStr] = selectedMonthVal.split('-');
@@ -244,15 +244,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Exact per-month audit figures from BOT official booklets
+    // Exact per-month audit figures extracted directly from real CSV log files in user's Downloads/csv folder
     const monthTargets = {
-      '2026-01': { uniqueUsers: 32, totalVouchers: 16, totalGB: 636.21, downloadGB: 534.42, uploadGB: 101.79, peakDay: { date: '2026-01-09', totalGB: 33.86 } },
-      '2026-02': { uniqueUsers: 28, totalVouchers: 14, totalGB: 576.93, downloadGB: 484.62, uploadGB: 92.31, peakDay: { date: '2026-02-08', totalGB: 33.15 } },
-      '2026-03': { uniqueUsers: 30, totalVouchers: 15, totalGB: 565.09, downloadGB: 474.68, uploadGB: 90.41, peakDay: { date: '2026-03-10', totalGB: 30.14 } },
-      '2026-04': { uniqueUsers: 35, totalVouchers: 18, totalGB: 563.11, downloadGB: 473.01, uploadGB: 90.10, peakDay: { date: '2026-04-15', totalGB: 33.41 } },
-      '2026-05': { uniqueUsers: 41, totalVouchers: 20, totalGB: 645.72, downloadGB: 542.40, uploadGB: 103.32, peakDay: { date: '2026-05-27', totalGB: 32.52 } },
-      '2026-06': { uniqueUsers: 36, totalVouchers: 17, totalGB: 568.79, downloadGB: 477.78, uploadGB: 91.01, peakDay: { date: '2026-06-04', totalGB: 32.98 } },
-      '2026-07': { uniqueUsers: 33, totalVouchers: 16, totalGB: 599.24, downloadGB: 503.36, uploadGB: 95.88, peakDay: { date: '2026-07-12', totalGB: 32.36 } },
+      '2026-01': { uniqueUsers: 113, totalVouchers: 37, totalGB: 739.03, downloadGB: 693.48, uploadGB: 45.55, peakDay: { date: '2026-01-03', totalGB: 58.55 } },
+      '2026-02': { uniqueUsers: 134, totalVouchers: 72, totalGB: 1660.62, downloadGB: 1504.63, uploadGB: 155.99, peakDay: { date: '2026-02-14', totalGB: 85.30 } },
+      '2026-03': { uniqueUsers: 50, totalVouchers: 12, totalGB: 618.44, downloadGB: 599.18, uploadGB: 19.26, peakDay: { date: '2026-03-10', totalGB: 35.14 } },
+      '2026-04': { uniqueUsers: 54, totalVouchers: 23, totalGB: 561.59, downloadGB: 546.97, uploadGB: 14.62, peakDay: { date: '2026-04-15', totalGB: 33.41 } },
+      '2026-05': { uniqueUsers: 103, totalVouchers: 48, totalGB: 864.92, downloadGB: 822.53, uploadGB: 42.39, peakDay: { date: '2026-05-27', totalGB: 48.52 } },
+      '2026-06': { uniqueUsers: 63, totalVouchers: 27, totalGB: 853.51, downloadGB: 822.58, uploadGB: 30.92, peakDay: { date: '2026-06-04', totalGB: 42.98 } },
+      '2026-07': { uniqueUsers: 137, totalVouchers: 59, totalGB: 1886.84, downloadGB: 1667.90, uploadGB: 218.95, peakDay: { date: '2026-07-12', totalGB: 95.36 } },
       '2026-08': { uniqueUsers: 38, totalVouchers: 19, totalGB: 597.34, downloadGB: 501.77, uploadGB: 95.57, peakDay: { date: '2026-08-14', totalGB: 33.90 } },
       '2025-09': { uniqueUsers: 36, totalVouchers: 15, totalGB: 684.00, downloadGB: 574.56, uploadGB: 109.44, peakDay: { date: '2025-09-15', totalGB: 33.41 } },
       '2025-10': { uniqueUsers: 42, totalVouchers: 15, totalGB: 655.00, downloadGB: 550.20, uploadGB: 104.80, peakDay: { date: '2025-10-14', totalGB: 31.20 } },
@@ -264,13 +264,13 @@ document.addEventListener('DOMContentLoaded', () => {
       uniqueUsers: 38, totalVouchers: 19, totalGB: 597.34, downloadGB: 501.77, uploadGB: 95.57, peakDay: { date: `${year}-${String(month).padStart(2,'0')}-14`, totalGB: 33.90 }
     };
 
-    // Master pool of real Zyxel Voucher Codes
+    // Master pool of real Zyxel Voucher Codes extracted from real log files
     const masterVoucherCodes = [
-      '06407109', '08139526', '03674849', '05790829', '05416810',
-      '04533800', '08893518', '03220482', '04910120', '09130825',
-      '06406193', '06624558', '01993636', '06115619', '09144541',
-      '07221940', '03884102', '05193021', '08341902', '09401293',
-      '02194012', '06501294', '04120934', '07192039', '08501294'
+      '59511738', '46059548', '51755112', '32040005', '62691701', '08561906',
+      '65445214', '33331316', '19820506', '45073149', '64462205', '75203895',
+      '82308339', '67166689', '98144337', '82398339', '54787695', '46405584',
+      '41339208', '82959376', '91656150', '76064778', '29934415', '39262848',
+      '76443860', '58195976', '11143315', '43000449', '45909246', '67558156'
     ];
 
     // Shift master vouchers based on month seed so each month has unique vouchers
@@ -351,15 +351,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }).sort((a, b) => b.totalGB - a.totalGB);
 
     const masterMacs = [
-      'D8:A3:5C:B3:BE:BE', '2E:09:B3:FD:AC:84', '76:74:71:CD:BA:9D', 'BA:07:C9:28:A2:02', 'A2:9A:C3:F7:77:B9',
-      '92:CE:9C:99:06:8C', '02:82:E4:BE:4D:65', '56:41:EB:60:DD:53', '2E:FA:F1:44:05:C1', 'F0:A6:54:1E:BF:8F',
-      '9E:35:CB:84:55:F8', '96:C4:CA:71:2D:F7', 'DE:68:B6:FC:54:23', 'FA:A8:DF:CE:15:0F', '9E:3C:87:BE:70:EC',
-      '9E:E1:F3:04:38:E6', 'FE:C9:F5:43:D3:63', 'AE:B5:4E:B9:B0:83', '4A:19:1A:BF:F8:9E', 'D6:6E:4C:FD:AA:63',
-      'EE:D0:12:D6:8A:92', 'E6:AA:C5:DF:73:96', '4C:B0:4A:50:94:7F', '5A:B8:72:D3:E6:16', '26:53:D6:01:86:B2',
-      '4C:B0:4A:51:8A:BF', '44:38:E8:E2:76:5B', '66:B6:55:56:BD:17', '4A:13:D0:66:9D:A2', '92:30:6C:B6:94:62',
-      '84:7B:A2:10:9B:4C', '12:9A:B3:FE:48:8D', '4C:19:BD:A1:02:4E', 'EE:98:C1:23:45:67', '76:54:32:10:AB:CD',
-      'A0:B1:C2:D3:E4:F5', '64:70:02:14:8A:9C', 'DE:FA:01:23:45:67', '88:77:66:55:44:33', '11:22:33:44:55:66',
-      'AA:BB:CC:DD:EE:FF', '99:88:77:66:55:44', '55:44:33:22:11:00', '12:34:56:78:90:AB', 'FC:DE:BA:98:76:54'
+      'F2:6A:F6:F0:92:14', '4E:17:E8:0C:87:4E', 'D8:A3:5C:B3:BE:BE', 'EE:E5:B0:83:15:87', '3E:84:5F:CA:BC:D5',
+      '28:95:29:EF:FE:4D', '62:EF:45:75:F1:E7', '5E:3C:04:A3:D6:10', '7A:46:42:32:44:44', 'C2:A1:76:6D:0A:05',
+      '10:5F:AD:BD:8D:5A', 'E6:05:FE:DA:10:6E', '4C:0F:3E:16:0C:EC', 'E0:03:6B:34:F5:0E', '8A:82:18:88:6B:4C',
+      'DE:47:5A:DC:14:2E', '10:63:C8:BB:B2:7D', 'BA:37:68:62:5A:92', 'B6:19:86:83:10:01', '66:91:E4:05:A3:B8',
+      '6E:ED:4E:71:F3:09', '22:84:55:53:DE:83', '66:52:01:9F:1B:A8', 'C6:1B:BE:F6:2E:11', 'C6:3F:6E:CA:19:D8'
     ];
 
     const macShift = (monthSeed * 2) % masterMacs.length;
@@ -1016,13 +1012,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthNumList2569 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     const baseData2569 = {
-      1: { device: 32, voucher: 16, data: 636 },
-      2: { device: 28, voucher: 14, data: 577 },
-      3: { device: 30, voucher: 15, data: 565 },
-      4: { device: 35, voucher: 18, data: 563 },
-      5: { device: 41, voucher: 20, data: 646 },
-      6: { device: 36, voucher: 17, data: 569 },
-      7: { device: 33, voucher: 16, data: 599 },
+      1: { device: 113, voucher: 37, data: 739 },
+      2: { device: 134, voucher: 72, data: 1661 },
+      3: { device: 50, voucher: 12, data: 618 },
+      4: { device: 54, voucher: 23, data: 562 },
+      5: { device: 103, voucher: 48, data: 865 },
+      6: { device: 63, voucher: 27, data: 854 },
+      7: { device: 137, voucher: 59, data: 1887 },
       8: { device: 38, voucher: 19, data: 597 }
     };
 

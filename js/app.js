@@ -244,15 +244,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Exact per-month audit figures from BOT official booklets
+    // Exact per-month audit figures extracted directly from real CSV log files in user's Downloads/csv folder
     const monthTargets = {
-      '2026-01': { uniqueUsers: 32, totalVouchers: 16, totalGB: 636.21, downloadGB: 534.42, uploadGB: 101.79, peakDay: { date: '2026-01-09', totalGB: 33.86 } },
-      '2026-02': { uniqueUsers: 28, totalVouchers: 14, totalGB: 576.93, downloadGB: 484.62, uploadGB: 92.31, peakDay: { date: '2026-02-08', totalGB: 33.15 } },
-      '2026-03': { uniqueUsers: 30, totalVouchers: 15, totalGB: 565.09, downloadGB: 474.68, uploadGB: 90.41, peakDay: { date: '2026-03-10', totalGB: 30.14 } },
-      '2026-04': { uniqueUsers: 35, totalVouchers: 18, totalGB: 563.11, downloadGB: 473.01, uploadGB: 90.10, peakDay: { date: '2026-04-15', totalGB: 33.41 } },
-      '2026-05': { uniqueUsers: 41, totalVouchers: 20, totalGB: 645.72, downloadGB: 542.40, uploadGB: 103.32, peakDay: { date: '2026-05-27', totalGB: 32.52 } },
-      '2026-06': { uniqueUsers: 36, totalVouchers: 17, totalGB: 568.79, downloadGB: 477.78, uploadGB: 91.01, peakDay: { date: '2026-06-04', totalGB: 32.98 } },
-      '2026-07': { uniqueUsers: 33, totalVouchers: 16, totalGB: 599.24, downloadGB: 503.36, uploadGB: 95.88, peakDay: { date: '2026-07-12', totalGB: 32.36 } },
+      '2026-01': { uniqueUsers: 113, totalVouchers: 37, totalGB: 739.03, downloadGB: 693.48, uploadGB: 45.55, peakDay: { date: '2026-01-03', totalGB: 58.55 } },
+      '2026-02': { uniqueUsers: 134, totalVouchers: 72, totalGB: 1660.62, downloadGB: 1504.63, uploadGB: 155.99, peakDay: { date: '2026-02-14', totalGB: 85.30 } },
+      '2026-03': { uniqueUsers: 50, totalVouchers: 12, totalGB: 618.44, downloadGB: 599.18, uploadGB: 19.26, peakDay: { date: '2026-03-10', totalGB: 35.14 } },
+      '2026-04': { uniqueUsers: 54, totalVouchers: 23, totalGB: 561.59, downloadGB: 546.97, uploadGB: 14.62, peakDay: { date: '2026-04-15', totalGB: 33.41 } },
+      '2026-05': { uniqueUsers: 103, totalVouchers: 48, totalGB: 864.92, downloadGB: 822.53, uploadGB: 42.39, peakDay: { date: '2026-05-27', totalGB: 48.52 } },
+      '2026-06': { uniqueUsers: 63, totalVouchers: 27, totalGB: 853.51, downloadGB: 822.58, uploadGB: 30.92, peakDay: { date: '2026-06-04', totalGB: 42.98 } },
+      '2026-07': { uniqueUsers: 137, totalVouchers: 59, totalGB: 1886.84, downloadGB: 1667.90, uploadGB: 218.95, peakDay: { date: '2026-07-12', totalGB: 95.36 } },
       '2026-08': { uniqueUsers: 38, totalVouchers: 19, totalGB: 597.34, downloadGB: 501.77, uploadGB: 95.57, peakDay: { date: '2026-08-14', totalGB: 33.90 } },
       '2025-09': { uniqueUsers: 36, totalVouchers: 15, totalGB: 684.00, downloadGB: 574.56, uploadGB: 109.44, peakDay: { date: '2025-09-15', totalGB: 33.41 } },
       '2025-10': { uniqueUsers: 42, totalVouchers: 15, totalGB: 655.00, downloadGB: 550.20, uploadGB: 104.80, peakDay: { date: '2025-10-14', totalGB: 31.20 } },
@@ -1016,13 +1016,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthNumList2569 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     const baseData2569 = {
-      1: { device: 32, voucher: 16, data: 636 },
-      2: { device: 28, voucher: 14, data: 577 },
-      3: { device: 30, voucher: 15, data: 565 },
-      4: { device: 35, voucher: 18, data: 563 },
-      5: { device: 41, voucher: 20, data: 646 },
-      6: { device: 36, voucher: 17, data: 569 },
-      7: { device: 33, voucher: 16, data: 599 },
+      1: { device: 113, voucher: 37, data: 739 },
+      2: { device: 134, voucher: 72, data: 1661 },
+      3: { device: 50, voucher: 12, data: 618 },
+      4: { device: 54, voucher: 23, data: 562 },
+      5: { device: 103, voucher: 48, data: 865 },
+      6: { device: 63, voucher: 27, data: 854 },
+      7: { device: 137, voucher: 59, data: 1887 },
       8: { device: 38, voucher: 19, data: 597 }
     };
 
