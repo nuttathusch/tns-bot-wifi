@@ -122,10 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
           }
         }
-        throw new Error('ไม่สามารถเชื่อมต่อ API Server ได้');
+        throw new Error('ไม่พบ Backend Server');
       } catch (e) {
-        apiStatusMessage.style.color = '#c53030';
-        apiStatusMessage.innerHTML = `❌ ไม่สามารถเชื่อมต่อกับ Zyxel Nebula API ได้ กรุณาอัปโหลดไฟล์ Log (CSV/Excel) เพื่อประมวลผลข้อมูลจริง`;
+        apiStatusMessage.style.color = '#2b6cb0';
+        apiStatusMessage.innerHTML = `ℹ️ เมื่อเปิดผ่านไฟล์ในเครื่อง (file://) หรือ GitHub Pages กรุณากดเลือกไฟล์ Log (CSV/Excel) ที่อัปโหลดในกล่องด้านล่าง ระบบจะประมวลผลข้อมูลจริงจากไฟล์ให้ทันทีครับ! 📁`;
       } finally {
         showLoading(false);
       }
