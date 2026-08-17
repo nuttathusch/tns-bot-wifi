@@ -87,17 +87,40 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- MODE TAB NAVIGATION HANDLERS ---
-  if (navTabUpload && navTabApi) {
+  if (navTabMachineCsv && navTabUpload && navTabApi) {
+    navTabMachineCsv.addEventListener('click', () => {
+      navTabMachineCsv.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #2b6cb0 100%)';
+      navTabMachineCsv.style.color = '#ffffff';
+      navTabMachineCsv.className = 'btn';
+
+      navTabUpload.style.background = 'transparent';
+      navTabUpload.style.color = '#2b6cb0';
+      navTabUpload.className = 'btn btn-outline';
+
+      navTabApi.style.background = 'transparent';
+      navTabApi.style.color = '#2b6cb0';
+      navTabApi.className = 'btn btn-outline';
+
+      machineCsvSection.classList.remove('hidden');
+      uploadMenuSection.classList.add('hidden');
+      apiMenuSection.classList.add('hidden');
+    });
+
     navTabUpload.addEventListener('click', () => {
       navTabUpload.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #2b6cb0 100%)';
       navTabUpload.style.color = '#ffffff';
       navTabUpload.className = 'btn';
+
+      navTabMachineCsv.style.background = 'transparent';
+      navTabMachineCsv.style.color = '#2b6cb0';
+      navTabMachineCsv.className = 'btn btn-outline';
 
       navTabApi.style.background = 'transparent';
       navTabApi.style.color = '#2b6cb0';
       navTabApi.className = 'btn btn-outline';
 
       uploadMenuSection.classList.remove('hidden');
+      machineCsvSection.classList.add('hidden');
       apiMenuSection.classList.add('hidden');
     });
 
@@ -106,14 +129,53 @@ document.addEventListener('DOMContentLoaded', () => {
       navTabApi.style.color = '#ffffff';
       navTabApi.className = 'btn';
 
+      navTabMachineCsv.style.background = 'transparent';
+      navTabMachineCsv.style.color = '#2b6cb0';
+      navTabMachineCsv.className = 'btn btn-outline';
+
       navTabUpload.style.background = 'transparent';
       navTabUpload.style.color = '#2b6cb0';
       navTabUpload.className = 'btn btn-outline';
 
       apiMenuSection.classList.remove('hidden');
+      machineCsvSection.classList.add('hidden');
       uploadMenuSection.classList.add('hidden');
     });
   }
+
+  // --- MACHINE CSV 7-MONTH BUTTON LISTENERS ---
+  const machineMonthBtns = document.querySelectorAll('.btn-machine-month');
+  machineMonthBtns.forEach(btn => {
+    btn.addEventListener('click', async () => {
+      machineMonthBtns.forEach(b => {
+        b.style.background = '#ffffff';
+        b.style.color = '#1e3a8a';
+        b.style.border = '1px solid #cbd5e1';
+        b.style.boxShadow = 'none';
+        const span = b.querySelector('span');
+        if (span) span.style.color = '#64748b';
+      });
+
+      btn.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #2b6cb0 100%)';
+      btn.style.color = '#ffffff';
+      btn.style.border = 'none';
+      btn.style.boxShadow = '0 3px 10px rgba(30,58,138,0.25)';
+      const activeSpan = btn.querySelector('span');
+      if (activeSpan) activeSpan.style.color = 'rgba(255,255,255,0.9)';
+
+      const monthVal = btn.getAttribute('data-month');
+      showLoading(true);
+      try {
+        const report = await fetchNebulaApiDirect('AULtShTXkkke41C2FX', monthVal);
+        currentReportData = report;
+        renderDashboard(report);
+      } catch (err) {
+        alert('เกิดข้อผิดพลาดในการโหลดรายงาน: ' + err.message);
+      } finally {
+        showLoading(false);
+      }
+    });
+  });
 
   // --- 2. DROPZONE & FILE UPLOAD HANDLERS ---
   if (dropzone) {

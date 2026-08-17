@@ -153,9 +153,12 @@
 
     <!-- MODE SWITCH MENU TABS -->
     <div class="card" style="margin-bottom: 20px; padding: 12px 18px; background: #f8fafc;">
-      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <button id="navTabUpload" class="btn" style="background: linear-gradient(135deg, #1e3a8a 0%, #2b6cb0 100%); color: #ffffff; font-weight: 700;">
-          📂 เมนูอัปโหลดไฟล์ Log จริงเพื่อวิเคราะห์ข้อมูลแยกรายเดือน
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <button id="navTabMachineCsv" class="btn" style="background: linear-gradient(135deg, #1e3a8a 0%, #2b6cb0 100%); color: #ffffff; font-weight: 700;">
+          📊 สรุปผลการวิเคราะห์ไฟล์ CSV จากเครื่องของคุณ (7 เดือน)
+        </button>
+        <button id="navTabUpload" class="btn btn-outline" style="font-weight: 600; color: #2b6cb0; border-color: #2b6cb0;">
+          📂 อัปโหลดไฟล์ Log อื่นๆ เพิ่มเติม
         </button>
         <button id="navTabApi" class="btn btn-outline" style="font-weight: 600; color: #2b6cb0; border-color: #2b6cb0;">
           ⚡ ดึงข้อมูลตรงจาก Zyxel Nebula OpenAPI
@@ -163,11 +166,53 @@
       </div>
     </div>
 
-    <!-- MAIN FILE UPLOAD & ANALYZER MENU CARD -->
-    <section id="uploadMenuSection" class="card upload-section" style="margin-bottom: 24px;">
+    <!-- 1. PRE-ANALYZED MACHINE CSV FILES SUMMARY MENU CARD -->
+    <section id="machineCsvSection" class="card" style="margin-bottom: 24px; border: 1.5px solid #2b6cb0; background: #ffffff;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="color: #1e3a8a; font-size: 17px; font-weight: 700;">📊 สรุปผลการวิเคราะห์ไฟล์ CSV จากเครื่องของคุณแบบละเอียด (แยกรายเดือน 7 เดือน)</h3>
+          <p style="font-size: 13px; color: #475569; margin-top: 4px;">
+            วิเคราะห์และสกัดข้อมูลจากไฟล์ CSV จริง 7 ไฟล์ (<code style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-family:monospace;">event-log-ap *.csv</code>) ใน <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-family:monospace;">C:\Users\Nuttathus Chaiwut\Downloads\csv</code> รวม 346,681 แถวข้อมูล
+          </p>
+        </div>
+        <span class="badge" style="background: #2b6cb0; color: #ffffff; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 12px;">✅ 346,681 แถวข้อมูลจริง</span>
+      </div>
+
+      <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 12px;">
+        👉 คลิกเลือกเดือนเพื่อดูรายงานสรุปประจำเดือนอย่างละเอียด และกดปุ่มดาวน์โหลดรายงาน PDF / Excel:
+      </div>
+
+      <!-- 7 MONTH SELECTION BUTTON PILLS -->
+      <div id="machineCsvMonthButtons" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
+        <button class="btn btn-machine-month" data-month="2026-07" style="padding: 10px 16px; font-size: 13px; border-radius: 12px; font-weight: 700; background: linear-gradient(135deg, #1e3a8a 0%, #2b6cb0 100%); color: #fff; border: none; cursor: pointer; box-shadow: 0 3px 10px rgba(30,58,138,0.25);">
+          📅 กรกฎาคม 2569 <span style="font-size: 11px; opacity: 0.9; display: block; font-weight: 400;">(1,886.84 GB | 137 เครื่อง)</span>
+        </button>
+        <button class="btn btn-machine-month" data-month="2026-06" style="padding: 10px 16px; font-size: 13px; border-radius: 12px; font-weight: 600; background: #ffffff; color: #1e3a8a; border: 1px solid #cbd5e1; cursor: pointer;">
+          📅 มิถุนายน 2569 <span style="font-size: 11px; color: #64748b; display: block; font-weight: 400;">(853.51 GB | 63 เครื่อง)</span>
+        </button>
+        <button class="btn btn-machine-month" data-month="2026-05" style="padding: 10px 16px; font-size: 13px; border-radius: 12px; font-weight: 600; background: #ffffff; color: #1e3a8a; border: 1px solid #cbd5e1; cursor: pointer;">
+          📅 พฤษภาคม 2569 <span style="font-size: 11px; color: #64748b; display: block; font-weight: 400;">(864.92 GB | 103 เครื่อง)</span>
+        </button>
+        <button class="btn btn-machine-month" data-month="2026-04" style="padding: 10px 16px; font-size: 13px; border-radius: 12px; font-weight: 600; background: #ffffff; color: #1e3a8a; border: 1px solid #cbd5e1; cursor: pointer;">
+          📅 เมษายน 2569 <span style="font-size: 11px; color: #64748b; display: block; font-weight: 400;">(561.59 GB | 54 เครื่อง)</span>
+        </button>
+        <button class="btn btn-machine-month" data-month="2026-03" style="padding: 10px 16px; font-size: 13px; border-radius: 12px; font-weight: 600; background: #ffffff; color: #1e3a8a; border: 1px solid #cbd5e1; cursor: pointer;">
+          📅 มีนาคม 2569 <span style="font-size: 11px; color: #64748b; display: block; font-weight: 400;">(618.44 GB | 50 เครื่อง)</span>
+        </button>
+        <button class="btn btn-machine-month" data-month="2026-02" style="padding: 10px 16px; font-size: 13px; border-radius: 12px; font-weight: 600; background: #ffffff; color: #1e3a8a; border: 1px solid #cbd5e1; cursor: pointer;">
+          📅 กุมภาพันธ์ 2569 <span style="font-size: 11px; color: #64748b; display: block; font-weight: 400;">(1,660.62 GB | 134 เครื่อง)</span>
+        </button>
+        <button class="btn btn-machine-month" data-month="2026-01" style="padding: 10px 16px; font-size: 13px; border-radius: 12px; font-weight: 600; background: #ffffff; color: #1e3a8a; border: 1px solid #cbd5e1; cursor: pointer;">
+          📅 มกราคม 2569 <span style="font-size: 11px; color: #64748b; display: block; font-weight: 400;">(739.03 GB | 113 เครื่อง)</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. MAIN FILE UPLOAD & ANALYZER MENU CARD -->
+    <section id="uploadMenuSection" class="card upload-section hidden" style="margin-bottom: 24px;">
       <div class="dropzone" id="dropzone" style="padding: 28px 20px;">
         <div class="dropzone-icon" style="font-size: 42px; margin-bottom: 10px;">📂</div>
-        <h2 style="font-size: 18px; color: #1e293b; font-weight: 700; margin-bottom: 6px;">อัปโหลดไฟล์ Log จริงเพื่อเริ่มประมวลผลและวิเคราะห์แยกรายเดือน</h2>
+        <h2 style="font-size: 18px; color: #1e3a8a; font-weight: 700; margin-bottom: 6px;">อัปโหลดไฟล์ Log จริงเพื่อเริ่มประมวลผลและวิเคราะห์แยกรายเดือน</h2>
         <p style="font-size: 13px; color: #64748b; margin-bottom: 16px; max-width: 680px; margin-left: auto; margin-right: auto;">
           รองรับไฟล์ Log จริง (.csv, .xlsx, .xls) ที่ Export จาก Zyxel Nebula Cloud (สามารถอัปโหลดไฟล์ที่มีข้อมูลหลายเดือนรวมกัน หรือไฟล์เดี่ยวได้ ระบบจะแยกวิเคราะห์และสร้างเล่มรายงานสรุปของทุกๆ เดือนให้อัตโนมัติ)
         </p>
