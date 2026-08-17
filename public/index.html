@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบสรุปรายงานการใช้งาน Wi-Fi ประจำเดือน - ธนาคารแห่งประเทศไทย (BOT)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="bot-badge">BANK OF THAILAND</div>
+        <div class="brand-title">
+          <h1>ระบบสรุปรายงาน Wi-Fi ประจำเดือนอัตโนมัติ</h1>
+          <p>ระบบอุปกรณ์ Zyxel Nebula | พัฒนาสำหรับ ธนาคารแห่งประเทศไทย (BOT)</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btnSampleDataHeader" class="sample-data-btn" style="color: #fff; border-color: rgba(255,255,255,0.4);">
+          📂 ทดสอบด้วยข้อมูลตัวอย่าง
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+
+    <!-- 1-Click Upload Card -->
+    <section class="upload-card">
+      <div id="dropzone" class="dropzone">
+        <div class="dropzone-icon">📁</div>
+        <h3>1-Click Upload ไฟล์ Log จาก Zyxel Nebula</h3>
+        <p>ลากไฟล์ CSV หรือ Excel ที่ Export จากระบบ Nebula NCC มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+        <label class="file-input-btn">
+          เลือกไฟล์ Log (.csv, .xlsx)
+          <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" style="display: none;">
+        </label>
+        <div style="margin-top: 12px;">
+          <button id="btnSampleData" class="sample-data-btn">✨ หรือทดลองประมวลผลด้วยข้อมูลตัวอย่าง (1-Click Sample)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- API Key Connection Card -->
+    <section class="table-card" style="margin-bottom: 32px;">
+      <div class="table-header-controls" style="margin-bottom: 12px;">
+        <h3>🔑 ตั้งค่า Zyxel Nebula OpenAPI Connection (ดึงข้อมูลผ่าน API)</h3>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <input type="text" id="apiTokenInput" class="search-input" style="flex: 1; min-width: 240px;" placeholder="กรอก API Token (เช่น AULtShTXkkke41C2FX)" value="AULtShTXkkke41C2FX">
+        
+        <select id="selectMonth" class="search-input" style="width: 220px; font-weight: 600; cursor: pointer; background: #ffffff;">
+          <option value="2026-08" selected>📅 สิงหาคม 2569 (ปัจจุบัน)</option>
+          <option value="2026-07">📅 กรกฎาคม 2569</option>
+          <option value="2026-06">📅 มิถุนายน 2569</option>
+          <option value="2026-05">📅 พฤษภาคม 2569</option>
+          <option value="2026-04">📅 เมษายน 2569</option>
+          <option value="2026-03">📅 มีนาคม 2569</option>
+          <option value="2026-02">📅 กุมภาพันธ์ 2569</option>
+          <option value="2026-01">📅 มกราคม 2569</option>
+          <option value="2025-12">📅 ธันวาคม 2568</option>
+          <option value="2025-11">📅 พฤศจิกายน 2568</option>
+          <option value="2025-10">📅 ตุลาคม 2568</option>
+          <option value="2025-09">📅 กันยายน 2568</option>
+        </select>
+
+        <button id="btnTestAPI" class="btn" style="background: #2b6cb0; color: #fff;">
+          ⚡ ดึงข้อมูลและสร้างรายงานผ่าน API (Sync & Generate Report)
+        </button>
+      </div>
+      <div id="apiStatusMessage" style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
+        บันทึก API Token เรียบร้อยแล้ว (ระบบจะส่ง Header <code>X-ZyxelNebula-API-Key</code> อัตโนมัติ)
+      </div>
+    </section>
+
+    <!-- Dashboard Content Area (Initially Hidden until file processed) -->
+    <div id="dashboardSection" class="hidden">
+
+      <!-- Export Action Bar -->
+      <section class="export-bar">
+        <div class="report-title-badge">
+          <h2>📊 รายงานสรุปประจำเดือน: <span id="reportMonthTag" style="color: #2b6cb0; font-weight: 700;">-</span></h2>
+        </div>
+        <div class="action-buttons">
+          <button id="btnExportPDF" class="btn btn-pdf">
+            📄 ดาวน์โหลดรายงาน PDF
+          </button>
+          <button id="btnExportExcel" class="btn btn-excel">
+            📊 ดาวน์โหลดไฟล์ Excel (.xlsx)
+          </button>
+        </div>
+      </section>
+
+      <!-- KPI Summary Cards -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">ปริมาณการใช้งานข้อมูลรวม</div>
+          <div class="kpi-value" id="kpiTotalGB">0 GB</div>
+          <div class="kpi-subtext" id="kpiDLUL">DL: 0 GB | UL: 0 GB</div>
+        </div>
+
+        <div class="kpi-card purple">
+          <div class="kpi-label">จำนวนผู้ใช้งาน / อุปกรณ์</div>
+          <div class="kpi-value" id="kpiUsers">0 คน</div>
+          <div class="kpi-subtext" id="kpiActiveDays">เข้าใช้รวม 0 วันในรอบเดือน</div>
+        </div>
+
+        <div class="kpi-card teal">
+          <div class="kpi-label">Vouchers ที่เปิดใช้งาน</div>
+          <div class="kpi-value" id="kpiVouchers">0 รหัส</div>
+          <div class="kpi-subtext">รหัสผ่านที่ถูกใช้งานในรอบเดือน</div>
+        </div>
+
+        <div class="kpi-card orange">
+          <div class="kpi-label">วันที่การใช้งานสูงสุด (Peak Day)</div>
+          <div class="kpi-value" id="kpiPeakDayDate" style="font-size: 1.4rem;">-</div>
+          <div class="kpi-subtext" id="kpiPeakDayGB">การใช้งาน 0 GB</div>
+        </div>
+      </section>
+
+      <!-- Visual Charts Grid -->
+      <section class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>📈 แนวโน้มการใช้งานข้อมูลรายวัน (Daily Usage Trend - GB)</h3>
+          </div>
+          <canvas id="chartDailyTrend" height="110"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>📡 การใช้งานแยกตาม Access Point (AP)</h3>
+          </div>
+          <canvas id="chartAP" height="220"></canvas>
+        </div>
+      </section>
+
+      <!-- Voucher Breakdown Table -->
+      <section class="table-card">
+        <div class="table-header-controls">
+          <h3>🎟️ สรุปรายละเอียดการใช้งานตามรหัส Voucher</h3>
+          <input type="text" id="searchVoucher" class="search-input" placeholder="🔍 ค้นหารหัส Voucher...">
+        </div>
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>รหัส Voucher</th>
+                <th>จำนวนผู้ใช้งาน (คน)</th>
+                <th>ปริมาณการใช้งานรวม (GB)</th>
+                <th>Download (GB)</th>
+                <th>Upload (GB)</th>
+                <th>จำนวนวันที่เข้าใช้</th>
+                <th>เข้าใช้งานล่าสุด</th>
+              </tr>
+            </thead>
+            <tbody id="voucherTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Access Point Breakdown Table -->
+      <section class="table-card">
+        <div class="table-header-controls">
+          <h3>🏢 สรุปพื้นที่และอุปกรณ์ Access Point</h3>
+        </div>
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ชื่ออุปกรณ์ AP / ตำแหน่งพื้นที่</th>
+                <th>จำนวนอุปกรณ์ผู้เข้าใช้ (คน)</th>
+                <th>ปริมาณการใช้งานข้อมูลรวม (GB)</th>
+              </tr>
+            </thead>
+            <tbody id="apTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Loading Spinner Overlay -->
+  <div id="loadingOverlay" class="spinner-overlay hidden">
+    <div class="spinner"></div>
+    <div style="font-weight: 600; font-size: 1.1rem;">กำลังประมวลผลข้อมูลรายงาน Wi-Fi...</div>
+    <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;">ระบบกำลังคำนวณ GB, Vouchers และสร้างแผนภูมิ</div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

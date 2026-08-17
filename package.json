@@ -1,0 +1,30 @@
+{
+  "name": "tns-bot-wifi-monthly-report",
+  "version": "1.0.0",
+  "description": "Automated Monthly Wi-Fi Usage Report Generator for Bank of Thailand (Zyxel Nebula)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "zyxel",
+    "nebula",
+    "bot",
+    "wifi",
+    "report",
+    "automation"
+  ],
+  "author": "Antigravity Assistant",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "papaparse": "^5.4.1",
+    "pdfkit": "^0.15.0",
+    "puppeteer-core": "^25.7.0",
+    "xlsx": "^0.18.5"
+  }
+}
