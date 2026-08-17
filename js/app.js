@@ -257,7 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
       '2026-02': { totalGB: 576.93, downloadGB: 484.62, uploadGB: 92.31, peakDay: { date: '2026-02-08', totalGB: 33.15 } },
       '2026-03': { totalGB: 565.09, downloadGB: 474.68, uploadGB: 90.41, peakDay: { date: '2026-03-10', totalGB: 30.14 } },
       '2026-04': { totalGB: 563.11, downloadGB: 473.01, uploadGB: 90.10, peakDay: { date: '2026-04-15', totalGB: 33.41 } },
-      '2026-05': { totalGB: 645.72, downloadGB: 542.40, uploadGB: 103.32, peakDay: { date: '2026-05-27', totalGB: 32.52 } }
+      '2026-05': { totalGB: 645.72, downloadGB: 542.40, uploadGB: 103.32, peakDay: { date: '2026-05-27', totalGB: 32.52 } },
+      '2026-06': { totalGB: 568.79, downloadGB: 477.78, uploadGB: 91.01, peakDay: { date: '2026-06-04', totalGB: 32.98 } },
+      '2026-07': { totalGB: 599.24, downloadGB: 503.36, uploadGB: 95.88, peakDay: { date: '2026-07-12', totalGB: 32.36 } },
+      '2026-08': { totalGB: 597.34, downloadGB: 501.77, uploadGB: 95.57, peakDay: { date: '2026-08-14', totalGB: 33.90 } }
     };
 
     const preset = monthPresetMetrics[monthValStr];
@@ -536,9 +539,9 @@ document.addEventListener('DOMContentLoaded', () => {
       3: { device: 30, voucher: 15, data: 565 },
       4: { device: 30, voucher: 15, data: 563 },
       5: { device: 30, voucher: 15, data: 646 },
-      6: { device: 30, voucher: 15, data: 620 },
-      7: { device: 30, voucher: 15, data: 610 },
-      8: { device: 30, voucher: 15, data: 590 }
+      6: { device: 30, voucher: 15, data: 569 },
+      7: { device: 30, voucher: 15, data: 599 },
+      8: { device: 30, voucher: 15, data: 597 }
     };
 
     const historicalTableData2569 = {};

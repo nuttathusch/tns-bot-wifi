@@ -93,17 +93,14 @@ class PDFService {
     monthNumList2568.forEach((mNum, idx) => {
       const keyStr = monthKeys2568[idx];
       if (!isYear2569 && mNum > currentMonthNum) {
-        // Show dash for future months in 2568
         historicalTableData2568[keyStr] = { device: '-', voucher: '-', data: '-' };
       } else if (!isYear2569 && mNum === currentMonthNum) {
-        // Update current month in 2568 with exact report summary
         historicalTableData2568[keyStr] = {
           device: summary.uniqueUsers || baseData2568[mNum].device,
           voucher: summary.totalVouchers || baseData2568[mNum].voucher,
           data: Math.round(summary.totalGB || baseData2568[mNum].data)
         };
       } else {
-        // Past month in 2568
         historicalTableData2568[keyStr] = baseData2568[mNum];
       }
     });
@@ -118,9 +115,9 @@ class PDFService {
       3: { device: 30, voucher: 15, data: 565 },
       4: { device: 30, voucher: 15, data: 563 },
       5: { device: 30, voucher: 15, data: 646 },
-      6: { device: 30, voucher: 15, data: 620 },
-      7: { device: 30, voucher: 15, data: 610 },
-      8: { device: 30, voucher: 15, data: 590 }
+      6: { device: 30, voucher: 15, data: 569 },
+      7: { device: 30, voucher: 15, data: 599 },
+      8: { device: 30, voucher: 15, data: 597 }
     };
 
     const historicalTableData2569 = {};
@@ -128,18 +125,15 @@ class PDFService {
       const keyStr = monthKeys2569[idx];
       if (isYear2569 && mNum <= currentMonthNum) {
         if (mNum === currentMonthNum) {
-          // Current selected month in 2569
           historicalTableData2569[keyStr] = {
             device: summary.uniqueUsers || (baseData2569[mNum] ? baseData2569[mNum].device : 30),
             voucher: summary.totalVouchers || (baseData2569[mNum] ? baseData2569[mNum].voucher : 15),
             data: Math.round(summary.totalGB || (baseData2569[mNum] ? baseData2569[mNum].data : 600))
           };
         } else {
-          // Completed past month in 2569
           historicalTableData2569[keyStr] = baseData2569[mNum] || { device: 30, voucher: 15, data: 600 };
         }
       } else {
-        // Future month in 2569 (after current month) -> Display dash (-)
         historicalTableData2569[keyStr] = { device: '-', voucher: '-', data: '-' };
       }
     });
