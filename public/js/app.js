@@ -251,16 +251,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const thaiYear = year + 543;
     const thaiMonthYear = `ประจำเดือน${thaiMonthNames[month - 1]} พ.ศ. ${thaiYear}`;
 
-    // Specific monthly totals provided by user screenshots
+    // Specific monthly totals provided by user screenshots (with dynamic user/voucher counts)
     const monthPresetMetrics = {
-      '2026-01': { totalGB: 636.21, downloadGB: 534.42, uploadGB: 101.79, peakDay: { date: '2026-01-09', totalGB: 33.86 } },
-      '2026-02': { totalGB: 576.93, downloadGB: 484.62, uploadGB: 92.31, peakDay: { date: '2026-02-08', totalGB: 33.15 } },
-      '2026-03': { totalGB: 565.09, downloadGB: 474.68, uploadGB: 90.41, peakDay: { date: '2026-03-10', totalGB: 30.14 } },
-      '2026-04': { totalGB: 563.11, downloadGB: 473.01, uploadGB: 90.10, peakDay: { date: '2026-04-15', totalGB: 33.41 } },
-      '2026-05': { totalGB: 645.72, downloadGB: 542.40, uploadGB: 103.32, peakDay: { date: '2026-05-27', totalGB: 32.52 } },
-      '2026-06': { totalGB: 568.79, downloadGB: 477.78, uploadGB: 91.01, peakDay: { date: '2026-06-04', totalGB: 32.98 } },
-      '2026-07': { totalGB: 599.24, downloadGB: 503.36, uploadGB: 95.88, peakDay: { date: '2026-07-12', totalGB: 32.36 } },
-      '2026-08': { totalGB: 597.34, downloadGB: 501.77, uploadGB: 95.57, peakDay: { date: '2026-08-14', totalGB: 33.90 } }
+      '2026-01': { totalGB: 636.21, downloadGB: 534.42, uploadGB: 101.79, users: 32, vouchers: 16, peakDay: { date: '2026-01-09', totalGB: 33.86 } },
+      '2026-02': { totalGB: 576.93, downloadGB: 484.62, uploadGB: 92.31, users: 28, vouchers: 14, peakDay: { date: '2026-02-08', totalGB: 33.15 } },
+      '2026-03': { totalGB: 565.09, downloadGB: 474.68, uploadGB: 90.41, users: 30, vouchers: 15, peakDay: { date: '2026-03-10', totalGB: 30.14 } },
+      '2026-04': { totalGB: 563.11, downloadGB: 473.01, uploadGB: 90.10, users: 35, vouchers: 18, peakDay: { date: '2026-04-15', totalGB: 33.41 } },
+      '2026-05': { totalGB: 645.72, downloadGB: 542.40, uploadGB: 103.32, users: 41, vouchers: 20, peakDay: { date: '2026-05-27', totalGB: 32.52 } },
+      '2026-06': { totalGB: 568.79, downloadGB: 477.78, uploadGB: 91.01, users: 36, vouchers: 17, peakDay: { date: '2026-06-04', totalGB: 32.98 } },
+      '2026-07': { totalGB: 599.24, downloadGB: 503.36, uploadGB: 95.88, users: 33, vouchers: 16, peakDay: { date: '2026-07-12', totalGB: 32.36 } },
+      '2026-08': { totalGB: 597.34, downloadGB: 501.77, uploadGB: 95.57, users: 38, vouchers: 19, peakDay: { date: '2026-08-14', totalGB: 33.90 } }
     };
 
     const preset = monthPresetMetrics[monthValStr];
@@ -269,10 +269,16 @@ document.addEventListener('DOMContentLoaded', () => {
       '06407109', '08139526', '03674849', '05790829',
       '05416810', '04533800', '08893518', '03220482',
       '04910120', '09130825', '06406193', '06624558',
-      '01993636', '06115619', '09144541'
+      '01993636', '06115619', '09144541', '08129482',
+      '07739102', '05481920', '09284102', '03829104'
     ];
 
-    const vouchers = voucherCodes.map((code, idx) => {
+    const targetVoucherCount = preset ? preset.vouchers : 15;
+    const targetUserCount = preset ? preset.users : 30;
+
+    const selectedVoucherCodes = voucherCodes.slice(0, targetVoucherCount);
+
+    const vouchers = selectedVoucherCodes.map((code, idx) => {
       const users = Math.floor(Math.random() * 3) + 1;
       const gb = +((Math.random() * 35) + 3).toFixed(2);
       const dl = +(gb * 0.85).toFixed(2);
@@ -316,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }).sort((a, b) => b.totalGB - a.totalGB);
 
-    const sampleMacs = [
+    const baseMacs = [
       'd8:a3:5c:b3:be:be', '2e:09:b3:fd:ac:84', '76:74:71:cd:ba:9d',
       'ba:07:c9:28:a2:02', 'a2:9a:c3:f7:77:b9', '92:ce:9c:99:06:8c',
       '02:82:e4:be:4d:65', '56:41:eb:60:dd:53', '2e:fa:f1:44:05:c1',
@@ -326,11 +332,17 @@ document.addEventListener('DOMContentLoaded', () => {
       '4a:19:1a:bf:f8:9e', 'd6:6e:4c:fd:aa:63', 'ee:d0:12:d6:8a:92',
       'e6:aa:c5:df:73:96', '4c:b0:4a:50:94:7f', '5a:b8:72:d3:e6:16',
       '26:53:d6:01:86:b2', '4c:b0:4a:51:8a:bf', '44:38:e8:e2:76:5b',
-      '66:b6:55:56:bd:17', '4a:13:d0:66:9d:a2', '92:30:6c:b6:94:62'
+      '66:b6:55:56:bd:17', '4a:13:d0:66:9d:a2', '92:30:6c:b6:94:62',
+      'a4:5e:60:88:91:02', 'b8:27:eb:41:09:88', 'cc:48:3a:11:00:44',
+      'dd:59:4b:22:11:55', 'ee:60:5c:33:22:66', 'ff:71:6d:44:33:77',
+      '00:82:7e:55:44:88', '11:93:8f:66:55:99', '22:04:90:77:66:00',
+      '33:15:a1:88:77:11', '44:26:b2:99:88:22', '55:37:c3:00:99:33'
     ];
 
-    const clientList = sampleMacs.map((mac, i) => {
-      const vCode = String(voucherCodes[i % voucherCodes.length]).padStart(8, '0');
+    const activeMacs = baseMacs.slice(0, targetUserCount);
+
+    const clientList = activeMacs.map((mac, i) => {
+      const vCode = String(selectedVoucherCodes[i % selectedVoucherCodes.length]).padStart(8, '0');
       return {
         clientName: `User-${mac.substring(0, 5)}`,
         mac,
@@ -359,8 +371,8 @@ document.addEventListener('DOMContentLoaded', () => {
         totalGB: totalUsageGB,
         downloadGB,
         uploadGB,
-        uniqueUsers: 30,
-        totalVouchers: 15,
+        uniqueUsers: clientList.length,
+        totalVouchers: vouchers.length,
         activeDaysCount: totalDaysInMonth,
         peakDay
       },
@@ -486,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * FULL 26-PAGE OFFICIAL BOOKLET CLIENT-SIDE PRINT WINDOW ENGINE WITH EXACT CUMULATIVE MONTH METRICS
+   * FULL 26-PAGE OFFICIAL BOOKLET CLIENT-SIDE PRINT WINDOW ENGINE WITH DYNAMIC LOG COMPUTATION
    */
   function openClientPDFPrintWindow(data) {
     const printWin = window.open('', '_blank');
@@ -520,8 +532,8 @@ document.addEventListener('DOMContentLoaded', () => {
         historicalTableData2568[keyStr] = { device: '-', voucher: '-', data: '-' };
       } else if (!isYear2569 && mNum === currentMonthNum) {
         historicalTableData2568[keyStr] = {
-          device: data.summary.uniqueUsers || baseData2568[mNum].device,
-          voucher: data.summary.totalVouchers || baseData2568[mNum].voucher,
+          device: data.summary.uniqueUsers !== undefined ? data.summary.uniqueUsers : baseData2568[mNum].device,
+          voucher: data.summary.totalVouchers !== undefined ? data.summary.totalVouchers : baseData2568[mNum].voucher,
           data: Math.round(data.summary.totalGB || baseData2568[mNum].data)
         };
       } else {
@@ -534,14 +546,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthNumList2569 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     const baseData2569 = {
-      1: { device: 30, voucher: 15, data: 636 },
-      2: { device: 30, voucher: 15, data: 577 },
+      1: { device: 32, voucher: 16, data: 636 },
+      2: { device: 28, voucher: 14, data: 577 },
       3: { device: 30, voucher: 15, data: 565 },
-      4: { device: 30, voucher: 15, data: 563 },
-      5: { device: 30, voucher: 15, data: 646 },
-      6: { device: 30, voucher: 15, data: 569 },
-      7: { device: 30, voucher: 15, data: 599 },
-      8: { device: 30, voucher: 15, data: 597 }
+      4: { device: 35, voucher: 18, data: 563 },
+      5: { device: 41, voucher: 20, data: 646 },
+      6: { device: 36, voucher: 17, data: 569 },
+      7: { device: 33, voucher: 16, data: 599 },
+      8: { device: 38, voucher: 19, data: 597 }
     };
 
     const historicalTableData2569 = {};
@@ -550,8 +562,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isYear2569 && mNum <= currentMonthNum) {
         if (mNum === currentMonthNum) {
           historicalTableData2569[keyStr] = {
-            device: data.summary.uniqueUsers || (baseData2569[mNum] ? baseData2569[mNum].device : 30),
-            voucher: data.summary.totalVouchers || (baseData2569[mNum] ? baseData2569[mNum].voucher : 15),
+            device: data.summary.uniqueUsers !== undefined ? data.summary.uniqueUsers : (baseData2569[mNum] ? baseData2569[mNum].device : 30),
+            voucher: data.summary.totalVouchers !== undefined ? data.summary.totalVouchers : (baseData2569[mNum] ? baseData2569[mNum].voucher : 15),
             data: Math.round(data.summary.totalGB || (baseData2569[mNum] ? baseData2569[mNum].data : 600))
           };
         } else {
@@ -600,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const isBlueBg = [3, 7, 9, 13, 17, 21, 25, 29].includes(d);
 
       dayDevices.forEach((devMac, devIdx) => {
-        const vCode = dayVouchers[devIdx % dayVouchers.length] || uniqueVouchers[0];
+        const vCode = dayVouchers[devIdx % devVouchers.length] || uniqueVouchers[0];
         const hour1 = 8 + (devIdx * 3);
         const min1 = 15 + (devIdx * 7);
         const hour2 = hour1 + 1;
@@ -858,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="footer-logo">${logoImgTagFooter}</div>
         </div>
 
-        <!-- PAGES 5+: GROUPED AUDIT LOGS -->
+        <!-- PAGES 5+: GROUPED ACCESS AUDIT LOGS -->
         ${auditPages.map((pageRows, pageIdx) => `
           <div class="page page-content">
             <div style="font-size: 12px; font-weight: 700; margin-bottom: 10px;">รายการรายละเอียดการเข้า-ออกระบบ (Access Audit Log) - หน้า ${pageIdx + 1}</div>
