@@ -5,7 +5,7 @@ const tnsLogoBase64 = require('./tnsLogoBase64');
 
 /**
  * Full Booklet PDF Generator Service for Bank of Thailand (BOT)
- * Dynamically updates historical monthly summary table (June - December 2568)
+ * Preserves complete historical monthly data (June - December 2568)
  */
 class PDFService {
   /**
@@ -80,7 +80,7 @@ class PDFService {
       'ส.ค': { device: 28, voucher: 5, data: 580 },
       'ก.ย': { device: 36, voucher: 15, data: 684 },
       'ต.ค': { device: 42, voucher: 15, data: 655 },
-      'พ.ย': { device: '-', voucher: '-', data: '-' },
+      'พ.ย': { device: 30, voucher: 15, data: 526 },
       'ธ.ค': { device: '-', voucher: '-', data: '-' }
     };
 

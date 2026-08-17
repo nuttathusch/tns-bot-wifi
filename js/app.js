@@ -476,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * FULL 26-PAGE OFFICIAL BOOKLET CLIENT-SIDE PRINT WINDOW ENGINE WITH DYNAMIC HISTORICAL MONTHS TABLE
+   * FULL 26-PAGE OFFICIAL BOOKLET CLIENT-SIDE PRINT WINDOW ENGINE WITH COMPLETE HISTORICAL MONTHS DATA
    */
   function openClientPDFPrintWindow(data) {
     const printWin = window.open('', '_blank');
@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'ส.ค': { device: 28, voucher: 5, data: 580 },
       'ก.ย': { device: 36, voucher: 15, data: 684 },
       'ต.ค': { device: 42, voucher: 15, data: 655 },
-      'พ.ย': { device: '-', voucher: '-', data: '-' },
+      'พ.ย': { device: 30, voucher: 15, data: 526 },
       'ธ.ค': { device: '-', voucher: '-', data: '-' }
     };
 
