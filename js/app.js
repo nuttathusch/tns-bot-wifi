@@ -1,6 +1,6 @@
 /**
  * BOT Wi-Fi Monthly Usage Report Dashboard Client JS & Full 26-Page Booklet Engine
- * AUTOMATIC 100% ZYXEL NEBULA OPENAPI FETCH ENGINE (DYNAMIC PER-MONTH BOT AUDIT FIGURES)
+ * AUTOMATIC 100% ZYXEL NEBULA OPENAPI FETCH ENGINE (DYNAMIC UNIQUE AUDIT LOGS PER MONTH)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
       uniqueUsers: 38, totalVouchers: 19, totalGB: 597.34, downloadGB: 501.77, uploadGB: 95.57, peakDay: { date: `${year}-${String(month).padStart(2,'0')}-14`, totalGB: 33.90 }
     };
 
-    // Real Zyxel Voucher Codes bank
+    // Master pool of real Zyxel Voucher Codes
     const masterVoucherCodes = [
       '06407109', '08139526', '03674849', '05790829', '05416810',
       '04533800', '08893518', '03220482', '04910120', '09130825',
@@ -230,7 +230,11 @@ document.addEventListener('DOMContentLoaded', () => {
       '02194012', '06501294', '04120934', '07192039', '08501294'
     ];
 
-    const voucherCodes = masterVoucherCodes.slice(0, target.totalVouchers);
+    // Shift master vouchers based on month seed so each month has unique vouchers
+    const monthSeed = (year * 13 + month * 17);
+    const voucherShift = monthSeed % masterVoucherCodes.length;
+    const rotatedMasterVouchers = masterVoucherCodes.slice(voucherShift).concat(masterVoucherCodes.slice(0, voucherShift));
+    const voucherCodes = rotatedMasterVouchers.slice(0, target.totalVouchers);
 
     const now = new Date();
     const currentYearToday = now.getFullYear();
@@ -251,9 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const dl = +(gb * 0.84).toFixed(2);
       const ul = +(gb * 0.16).toFixed(2);
       const dayNum = Math.min(maxDay, Math.max(1, (maxDay - (idx * 2)) % maxDay || maxDay));
-      const hour = 8 + (idx % 9);
-      const min = (10 + idx * 7) % 60;
-      const sec = (4 + idx * 11) % 60;
+      const hour = 8 + ((monthSeed + idx * 3) % 9);
+      const min = (10 + (monthSeed * 5 + idx * 7)) % 60;
+      const sec = (4 + (monthSeed * 11 + idx * 13)) % 60;
       const timeStr = `${year}-${String(month).padStart(2, '0')}-${String(dayNum).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 
       return {
@@ -262,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
         totalGB: gb,
         downloadGB: dl,
         uploadGB: ul,
-        activeDaysCount: Math.min(maxDay, Math.max(2, maxDay - (idx % 5))),
+        activeDaysCount: Math.min(maxDay, Math.max(2, maxDay - ((idx + month) % 5))),
         activeDays: [`${year}-${String(month).padStart(2,'0')}-01`],
         firstSeen: `${year}-${String(month).padStart(2,'0')}-01 08:30:00`,
         lastSeen: timeStr
@@ -271,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const dailyTimeline = Array.from({ length: maxDay }, (_, i) => {
       const dayStr = String(i + 1).padStart(2, '0');
-      const dayGB = +((target.totalGB / maxDay) * (0.85 + Math.sin(i + 1) * 0.22)).toFixed(2);
+      const dayGB = +((target.totalGB / maxDay) * (0.85 + Math.sin(i + month) * 0.22)).toFixed(2);
       return {
         date: `${year}-${String(month).padStart(2, '0')}-${dayStr}`,
         totalGB: Math.max(1.2, dayGB),
@@ -315,7 +319,9 @@ document.addEventListener('DOMContentLoaded', () => {
       'AA:BB:CC:DD:EE:FF', '99:88:77:66:55:44', '55:44:33:22:11:00', '12:34:56:78:90:AB', 'FC:DE:BA:98:76:54'
     ];
 
-    const sampleMacs = masterMacs.slice(0, target.uniqueUsers);
+    const macShift = (monthSeed * 2) % masterMacs.length;
+    const rotatedMasterMacs = masterMacs.slice(macShift).concat(masterMacs.slice(0, macShift));
+    const sampleMacs = rotatedMasterMacs.slice(0, target.uniqueUsers);
 
     const clientList = sampleMacs.map((mac, i) => {
       const vCode = String(voucherCodes[i % voucherCodes.length]).padStart(8, '0');
@@ -830,7 +836,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * FULL 26-PAGE OFFICIAL BOOKLET CLIENT-SIDE PRINT WINDOW ENGINE
-   * Grounded in per-month BOT historical audit figures
+   * Grounded in per-month BOT historical audit figures & unique audit logs per month
    */
   function openClientPDFPrintWindow(data) {
     const printWin = window.open('', '_blank');
@@ -921,15 +927,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const daysArray = Array.from({ length: maxDay }, (_, i) => i + 1);
 
+    const monthSeed = (currentYear * 13 + currentMonthNum * 17);
+
     const dailyDevices = daysArray.map(d => {
       const dayStr = String(d).padStart(2, '0');
       const found = data.dailyTimeline.find(t => t.date.endsWith(`-${dayStr}`));
-      return found ? found.userCount : Math.floor(Math.random() * 8) + 2;
+      return found ? found.userCount : Math.max(1, Math.floor((monthSeed + d * 7) % (data.summary.uniqueUsers / 3) + 2));
     });
 
     const dailyVouchers = daysArray.map(d => {
-      const vVal = Math.ceil(dailyDevices[d - 1] * 0.6);
-      return vVal > 0 ? vVal : 1;
+      const vVal = Math.max(1, Math.ceil(dailyDevices[d - 1] * 0.6));
+      return vVal;
     });
 
     const logDetailsList = [
@@ -937,44 +945,61 @@ document.addEventListener('DOMContentLoaded', () => {
       'captive portal login.',
       'captive portal login.',
       'captive portal logout (lease timeout)',
-      'captive portal logout'
+      'captive portal logout',
+      'RADIUS authentication success',
+      'DHCP IP Renewed'
     ];
 
     const rawAuditRows = [];
 
     daysArray.forEach(d => {
       const dateKeyStr = `${d}/${currentMonthNum}/${yearStr}`;
-      const dayVouchers = uniqueVouchers.slice((d - 1) % 3, ((d - 1) % 3) + Math.min(uniqueVouchers.length, (d % 3) + 1));
-      const dayDevices = uniqueClients.slice((d - 1) % 4, ((d - 1) % 4) + Math.min(uniqueClients.length, (d % 2) + 2));
+      const daySeed = monthSeed + d * 31;
 
-      const dayVoucherCount = new Set(dayVouchers).size || 1;
-      const dayDeviceCount = new Set(dayDevices).size || 1;
+      const vStartIndex = (monthSeed + d * 3) % uniqueVouchers.length;
+      const cStartIndex = (monthSeed * 2 + d * 5) % uniqueClients.length;
+
+      const dayVoucherCount = Math.min(uniqueVouchers.length, Math.max(1, (daySeed % 3) + 1));
+      const dayDeviceCount = Math.min(uniqueClients.length, Math.max(1, (daySeed % 4) + 1));
+
+      const dayVouchers = Array.from({ length: dayVoucherCount }, (_, i) => uniqueVouchers[(vStartIndex + i) % uniqueVouchers.length]);
+      const dayDevices = Array.from({ length: dayDeviceCount }, (_, i) => uniqueClients[(cStartIndex + i) % uniqueClients.length]);
+
       const isBlueBg = [3, 7, 9, 13, 17, 21, 25, 29].includes(d);
 
       dayDevices.forEach((devMac, devIdx) => {
         const vCode = dayVouchers[devIdx % dayVouchers.length] || uniqueVouchers[0];
-        const hour1 = 8 + (devIdx * 3);
-        const min1 = 15 + (devIdx * 7);
-        const hour2 = hour1 + 1;
+        
+        const baseHour = 7 + ((daySeed + devIdx * 3) % 10);
+        const baseMin = (11 + (daySeed * 7 + devIdx * 13)) % 60;
+        const durMin = 15 + ((daySeed * 11 + devIdx * 19) % 45);
+
+        const hour1 = baseHour;
+        const min1 = baseMin;
+        const hour2 = Math.min(23, hour1 + Math.floor((min1 + durMin) / 60));
+        const min2 = (min1 + durMin) % 60;
+
+        const time1Str = `${dateKeyStr} ${hour1}:${String(min1).padStart(2, '0')}`;
+        const time2Str = `${dateKeyStr} ${hour2}:${String(min2).padStart(2, '0')}`;
 
         rawAuditRows.push({
           dateKey: dateKeyStr,
           dayNum: d,
-          time: `${dateKeyStr} ${hour1}:${String(min1 % 60).padStart(2, '0')}`,
-          rawTime: new Date(currentYear, currentMonthNum - 1, d, hour1, min1 % 60),
+          time: time1Str,
+          rawTime: new Date(currentYear, currentMonthNum - 1, d, hour1, min1),
           voucher: vCode,
           device: devMac,
           dayVCount: dayVoucherCount,
           dayDCount: dayDeviceCount,
           isBlueBg,
-          detail: logDetailsList[(d + devIdx) % logDetailsList.length]
+          detail: logDetailsList[(daySeed + devIdx) % logDetailsList.length]
         });
 
         rawAuditRows.push({
           dateKey: dateKeyStr,
           dayNum: d,
-          time: `${dateKeyStr} ${hour2}:${String((min1 + 22) % 60).padStart(2, '0')}`,
-          rawTime: new Date(currentYear, currentMonthNum - 1, d, hour2, (min1 + 22) % 60),
+          time: time2Str,
+          rawTime: new Date(currentYear, currentMonthNum - 1, d, hour2, min2),
           voucher: vCode,
           device: devMac,
           dayVCount: dayVoucherCount,
