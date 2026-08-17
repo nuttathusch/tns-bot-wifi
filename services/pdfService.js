@@ -1,10 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer-core');
+const tnsLogoBase64 = require('./tnsLogoBase64');
 
 /**
  * Full Booklet PDF Generator Service for Bank of Thailand (BOT)
- * Replicates the exact official monthly report booklet with per-page rowspan alignment
+ * Uses official TNS Network Solutions logo image
  */
 class PDFService {
   /**
@@ -89,7 +90,6 @@ class PDFService {
     });
 
     // --- Build Grouped Audit Logs (Pages 5+) ---
-    // Sorted chronologically by day and time from 1st to end of month
     const logDetailsList = [
       'captive portal logout (lease timeout)',
       'captive portal login.',
@@ -103,16 +103,13 @@ class PDFService {
     daysArray.forEach(d => {
       const dateKeyStr = `${d}/${parseInt(monthStr, 10)}/${yearStr}`;
 
-      // Determine active vouchers & devices for this day
       const dayVouchers = uniqueVouchers.slice((d - 1) % 3, ((d - 1) % 3) + Math.min(uniqueVouchers.length, (d % 3) + 1));
       const dayDevices = uniqueClients.slice((d - 1) % 4, ((d - 1) % 4) + Math.min(uniqueClients.length, (d % 2) + 2));
 
-      // Calculate total unique vouchers and devices for this day
       const dayVoucherCount = new Set(dayVouchers).size || 1;
       const dayDeviceCount = new Set(dayDevices).size || 1;
       const isBlueBg = [3, 7, 9, 13, 17, 21, 25, 29].includes(d);
 
-      // Create log events for this day
       dayDevices.forEach((devMac, devIdx) => {
         const vCode = dayVouchers[devIdx % dayVouchers.length] || uniqueVouchers[0];
         const hour1 = 8 + (devIdx * 3);
@@ -147,20 +144,15 @@ class PDFService {
       });
     });
 
-    // Sort all rows chronologically by rawTime
     rawAuditRows.sort((a, b) => a.rawTime - b.rawTime);
 
-    // Paginate into chunks of ~32 rows per page
     const rowsPerPage = 32;
     const rawPages = [];
     for (let i = 0; i < rawAuditRows.length; i += rowsPerPage) {
       rawPages.push(rawAuditRows.slice(i, i + rowsPerPage));
     }
 
-    // Process each page independently to calculate per-page rowspan for day groups!
-    // This ensures table columns NEVER shift or go blank across page breaks!
     const auditPages = rawPages.map((pageRows) => {
-      // Group rows on this page by dateKey
       const pageDayMap = new Map();
       pageRows.forEach(r => {
         if (!pageDayMap.has(r.dateKey)) {
@@ -183,6 +175,10 @@ class PDFService {
 
       return processedRows;
     });
+
+    // Official TNS Logo HTML Image Tag
+    const tnsLogoHtmlCover = `<img src="${tnsLogoBase64}" alt="TNS Network Solutions Logo" style="height: 65px; object-fit: contain;">`;
+    const tnsLogoHtmlFooter = `<img src="${tnsLogoBase64}" alt="TNS Network Solutions Logo" style="height: 40px; object-fit: contain;">`;
 
     return `
 <!DOCTYPE html>
@@ -267,29 +263,12 @@ class PDFService {
     }
     .cover-footer-banner {
       background: #0f172a;
-      height: 85px;
+      height: 90px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0 35px;
       color: #ffffff;
-    }
-    .tns-logo-box {
-      background: #008299;
-      padding: 6px 16px;
-      border-radius: 4px;
-      font-family: 'Prompt', sans-serif;
-      font-weight: 800;
-      font-size: 20px;
-      color: #ffffff;
-      display: inline-block;
-    }
-    .tns-logo-box .subtext {
-      font-size: 11px;
-      font-weight: 400;
-      display: block;
-      margin-top: -3px;
-      letter-spacing: 0.5px;
     }
     .month-badge-box {
       background: #1e3a8a;
@@ -374,7 +353,7 @@ class PDFService {
       background: #f8fafc;
     }
 
-    /* --- AUDIT LOG TABLES (PER-PAGE PERFECT ROWSPAN ALIGNMENT) --- */
+    /* --- AUDIT LOG TABLES --- */
     .audit-table {
       width: 100%;
       border-collapse: collapse;
@@ -457,10 +436,7 @@ class PDFService {
     </div>
 
     <div class="cover-footer-banner">
-      <div class="tns-logo-box">
-        TnS
-        <span class="subtext">network solutions</span>
-      </div>
+      <div>${tnsLogoHtmlCover}</div>
       <div class="month-badge-box">${monthBadgeText}</div>
     </div>
   </div>
@@ -522,9 +498,7 @@ class PDFService {
     </table>
 
     <div class="footer-logo">
-      <div class="tns-logo-box" style="font-size: 13px; padding: 4px 10px;">
-        TnS <span class="subtext" style="font-size: 8px;">network solutions</span>
-      </div>
+      ${tnsLogoHtmlFooter}
     </div>
   </div>
 
@@ -566,9 +540,7 @@ class PDFService {
     </div>
 
     <div class="footer-logo">
-      <div class="tns-logo-box" style="font-size: 13px; padding: 4px 10px;">
-        TnS <span class="subtext" style="font-size: 8px;">network solutions</span>
-      </div>
+      ${tnsLogoHtmlFooter}
     </div>
   </div>
 
@@ -610,14 +582,12 @@ class PDFService {
     </div>
 
     <div class="footer-logo">
-      <div class="tns-logo-box" style="font-size: 13px; padding: 4px 10px;">
-        TnS <span class="subtext" style="font-size: 8px;">network solutions</span>
-      </div>
+      ${tnsLogoHtmlFooter}
     </div>
   </div>
 
 
-  <!-- PAGES 5+: GROUPED ACCESS AUDIT LOGS (WITH PER-PAGE PERFECT ROWSPAN ALIGNMENT) -->
+  <!-- PAGES 5+: GROUPED ACCESS AUDIT LOGS -->
   ${auditPages.map((pageRows, pageIdx) => `
     <div class="page page-content">
       <div style="font-size: 12px; font-weight: 700; margin-bottom: 10px;">รายการรายละเอียดการเข้า-ออกระบบ (Access Audit Log) - หน้า ${pageIdx + 1}</div>
@@ -647,9 +617,7 @@ class PDFService {
       </table>
 
       <div class="footer-logo">
-        <div class="tns-logo-box" style="font-size: 13px; padding: 4px 10px;">
-          TnS <span class="subtext" style="font-size: 8px;">network solutions</span>
-        </div>
+        ${tnsLogoHtmlFooter}
       </div>
     </div>
   `).join('')}
@@ -677,9 +645,7 @@ class PDFService {
     </div>
 
     <div class="footer-logo">
-      <div class="tns-logo-box" style="font-size: 13px; padding: 4px 10px;">
-        TnS <span class="subtext" style="font-size: 8px;">network solutions</span>
-      </div>
+      ${tnsLogoHtmlFooter}
     </div>
   </div>
 
@@ -708,9 +674,7 @@ class PDFService {
     </div>
     
     <div style="position: absolute; bottom: 35px; right: 45px;">
-      <div class="tns-logo-box" style="font-size: 16px; padding: 6px 14px;">
-        TnS <span class="subtext" style="font-size: 9px;">network solutions</span>
-      </div>
+      ${tnsLogoHtmlCover}
     </div>
   </div>
 
