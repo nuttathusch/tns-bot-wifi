@@ -328,20 +328,31 @@ document.addEventListener('DOMContentLoaded', () => {
       uniqueUsers: 38, totalVouchers: 19, totalGB: 597.34, downloadGB: 501.77, uploadGB: 95.57, peakDay: { date: `${year}-${String(month).padStart(2,'0')}-14`, totalGB: 33.90 }
     };
 
-    // Master pool of real Zyxel Voucher Codes extracted from real log files
-    const masterVoucherCodes = [
-      '59511738', '46059548', '51755112', '32040005', '62691701', '08561906',
-      '65445214', '33331316', '19820506', '45073149', '64462205', '75203895',
-      '82308339', '67166689', '98144337', '82398339', '54787695', '46405584',
-      '41339208', '82959376', '91656150', '76064778', '29934415', '39262848',
-      '76443860', '58195976', '11143315', '43000449', '45909246', '67558156'
-    ];
-
-    // Shift master vouchers based on month seed so each month has unique vouchers
     const monthSeed = (year * 13 + month * 17);
-    const voucherShift = monthSeed % masterVoucherCodes.length;
-    const rotatedMasterVouchers = masterVoucherCodes.slice(voucherShift).concat(masterVoucherCodes.slice(0, voucherShift));
-    const voucherCodes = rotatedMasterVouchers.slice(0, target.totalVouchers);
+
+    // Deterministically generate exact target counts of unique 8-digit Vouchers and MACs
+    const voucherCodesSet = new Set();
+    let vGenCount = 0;
+    while (voucherCodesSet.size < target.totalVouchers) {
+      const codeNum = (10000000 + ((monthSeed * 1000 + vGenCount * 9973) % 89999999));
+      voucherCodesSet.add(String(codeNum).padStart(8, '0'));
+      vGenCount++;
+    }
+    const voucherCodes = Array.from(voucherCodesSet);
+
+    const macSet = new Set();
+    let macGenCount = 0;
+    while (macSet.size < target.uniqueUsers) {
+      const b1 = ((monthSeed * 11 + macGenCount * 17) % 240 + 16).toString(16).padStart(2, '0');
+      const b2 = ((monthSeed * 13 + macGenCount * 19) % 240 + 16).toString(16).padStart(2, '0');
+      const b3 = ((monthSeed * 17 + macGenCount * 23) % 240 + 16).toString(16).padStart(2, '0');
+      const b4 = ((monthSeed * 19 + macGenCount * 29) % 240 + 16).toString(16).padStart(2, '0');
+      const b5 = ((monthSeed * 23 + macGenCount * 31) % 240 + 16).toString(16).padStart(2, '0');
+      const b6 = ((monthSeed * 29 + macGenCount * 37) % 240 + 16).toString(16).padStart(2, '0');
+      macSet.add(`${b1}:${b2}:${b3}:${b4}:${b5}:${b6}`.toUpperCase());
+      macGenCount++;
+    }
+    const sampleMacs = Array.from(macSet);
 
     const now = new Date();
     const currentYearToday = now.getFullYear();
@@ -413,18 +424,6 @@ document.addEventListener('DOMContentLoaded', () => {
         totalGB: +Math.max(1.2, target.totalGB * Math.max(0.015, share)).toFixed(2)
       };
     }).sort((a, b) => b.totalGB - a.totalGB);
-
-    const masterMacs = [
-      'F2:6A:F6:F0:92:14', '4E:17:E8:0C:87:4E', 'D8:A3:5C:B3:BE:BE', 'EE:E5:B0:83:15:87', '3E:84:5F:CA:BC:D5',
-      '28:95:29:EF:FE:4D', '62:EF:45:75:F1:E7', '5E:3C:04:A3:D6:10', '7A:46:42:32:44:44', 'C2:A1:76:6D:0A:05',
-      '10:5F:AD:BD:8D:5A', 'E6:05:FE:DA:10:6E', '4C:0F:3E:16:0C:EC', 'E0:03:6B:34:F5:0E', '8A:82:18:88:6B:4C',
-      'DE:47:5A:DC:14:2E', '10:63:C8:BB:B2:7D', 'BA:37:68:62:5A:92', 'B6:19:86:83:10:01', '66:91:E4:05:A3:B8',
-      '6E:ED:4E:71:F3:09', '22:84:55:53:DE:83', '66:52:01:9F:1B:A8', 'C6:1B:BE:F6:2E:11', 'C6:3F:6E:CA:19:D8'
-    ];
-
-    const macShift = (monthSeed * 2) % masterMacs.length;
-    const rotatedMasterMacs = masterMacs.slice(macShift).concat(masterMacs.slice(0, macShift));
-    const sampleMacs = rotatedMasterMacs.slice(0, target.uniqueUsers);
 
     const clientList = sampleMacs.map((mac, i) => {
       const vCode = String(voucherCodes[i % voucherCodes.length]).padStart(8, '0');
@@ -1237,6 +1236,72 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoImgTagCover = `<img src="images/tns-logo.png" alt="TNS Logo" style="height: 65px; object-fit: contain;">`;
     const logoImgTagFooter = `<img src="images/tns-logo.png" alt="TNS Logo" style="height: 40px; object-fit: contain;">`;
 
+    // Helper function for chunking array for 2-column tables (50 items per page max)
+    function chunkArrayForBooklet(arr, chunkSize = 50) {
+      const chunks = [];
+      for (let i = 0; i < arr.length; i += chunkSize) {
+        chunks.push({
+          startIndex: i,
+          items: arr.slice(i, i + chunkSize)
+        });
+      }
+      return chunks;
+    }
+
+    const voucherChunks = chunkArrayForBooklet(uniqueVouchers, 50);
+    const voucherPagesHTML = voucherChunks.map((chunk, pageIdx) => {
+      const col1 = chunk.items.slice(0, 25);
+      const col2 = chunk.items.slice(25, 50);
+      const pageTitleSuffix = voucherChunks.length > 1 ? ` (หน้า ${pageIdx + 1}/${voucherChunks.length})` : '';
+
+      return `
+        <!-- PAGE 3: VOUCHERS (PAGE ${pageIdx + 1}) -->
+        <div class="page page-content">
+          <div class="section-title">รายงานสรุปของผู้ประสานงาน</div>
+          <div class="section-subtitle">1) User Accounts/Voucher ที่ใช้งานในเดือน${monthBadgeText}${pageTitleSuffix}</div>
+          <div class="section-count">ทั้งหมดจำนวน ${uniqueVouchers.length} Users</div>
+          <div class="split-tables-wrapper">
+            <table class="split-table">
+              <thead><tr><th style="width: 50px;">ลำดับ</th><th>User Accounts/Voucher</th></tr></thead>
+              <tbody>${col1.map((v, i) => `<tr><td style="text-align: center;">${chunk.startIndex + i + 1}</td><td>${v}</td></tr>`).join('')}</tbody>
+            </table>
+            <table class="split-table">
+              <thead><tr><th style="width: 50px;">ลำดับ</th><th>User Accounts/Voucher</th></tr></thead>
+              <tbody>${col2.map((v, i) => `<tr><td style="text-align: center;">${chunk.startIndex + 25 + i + 1}</td><td>${v}</td></tr>`).join('')}</tbody>
+            </table>
+          </div>
+          <div class="footer-logo">${logoImgTagFooter}</div>
+        </div>
+      `;
+    }).join('');
+
+    const clientChunks = chunkArrayForBooklet(uniqueClients, 50);
+    const clientPagesHTML = clientChunks.map((chunk, pageIdx) => {
+      const col1 = chunk.items.slice(0, 25);
+      const col2 = chunk.items.slice(25, 50);
+      const pageTitleSuffix = clientChunks.length > 1 ? ` (หน้า ${pageIdx + 1}/${clientChunks.length})` : '';
+
+      return `
+        <!-- PAGE 4: DEVICES (PAGE ${pageIdx + 1}) -->
+        <div class="page page-content">
+          <div class="section-title">รายงานสรุปของผู้ประสานงาน</div>
+          <div class="section-subtitle">2) Client/Device ที่ใช้งานในเดือน${monthBadgeText}${pageTitleSuffix}</div>
+          <div class="section-count">ทั้งหมดจำนวน ${uniqueClients.length} Devices</div>
+          <div class="split-tables-wrapper">
+            <table class="split-table">
+              <thead><tr><th style="width: 50px;">ลำดับ</th><th>Clients</th></tr></thead>
+              <tbody>${col1.map((c, i) => `<tr><td style="text-align: center;">${chunk.startIndex + i + 1}</td><td>${c}</td></tr>`).join('')}</tbody>
+            </table>
+            <table class="split-table">
+              <thead><tr><th style="width: 50px;">ลำดับ</th><th>Clients</th></tr></thead>
+              <tbody>${col2.map((c, i) => `<tr><td style="text-align: center;">${chunk.startIndex + 25 + i + 1}</td><td>${c}</td></tr>`).join('')}</tbody>
+            </table>
+          </div>
+          <div class="footer-logo">${logoImgTagFooter}</div>
+        </div>
+      `;
+    }).join('');
+
     printWin.document.write(`
       <!DOCTYPE html>
       <html lang="th">
@@ -1391,41 +1456,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="footer-logo">${logoImgTagFooter}</div>
         </div>
 
-        <!-- PAGE 3: VOUCHERS -->
-        <div class="page page-content">
-          <div class="section-title">รายงานสรุปของผู้ประสานงาน</div>
-          <div class="section-subtitle">1) User Accounts/Voucher ที่ใช้งานในเดือน${monthBadgeText}</div>
-          <div class="section-count">ทั้งหมดจำนวน ${uniqueVouchers.length} Users</div>
-          <div class="split-tables-wrapper">
-            <table class="split-table">
-              <thead><tr><th style="width: 50px;">ลำดับ</th><th>User Accounts/Voucher</th></tr></thead>
-              <tbody>${uniqueVouchers.slice(0, 25).map((v, i) => `<tr><td style="text-align: center;">${i + 1}</td><td>${v}</td></tr>`).join('')}</tbody>
-            </table>
-            <table class="split-table">
-              <thead><tr><th style="width: 50px;">ลำดับ</th><th>User Accounts/Voucher</th></tr></thead>
-              <tbody>${uniqueVouchers.slice(25, 50).map((v, i) => `<tr><td style="text-align: center;">${i + 26}</td><td>${v}</td></tr>`).join('')}</tbody>
-            </table>
-          </div>
-          <div class="footer-logo">${logoImgTagFooter}</div>
-        </div>
+        <!-- DYNAMIC MULTI-PAGE VOUCHERS -->
+        ${voucherPagesHTML}
 
-        <!-- PAGE 4: DEVICES -->
-        <div class="page page-content">
-          <div class="section-title">รายงานสรุปของผู้ประสานงาน</div>
-          <div class="section-subtitle">2) Client/Device ที่ใช้งานในเดือน${monthBadgeText}</div>
-          <div class="section-count">ทั้งหมดจำนวน ${uniqueClients.length} Devices</div>
-          <div class="split-tables-wrapper">
-            <table class="split-table">
-              <thead><tr><th style="width: 50px;">ลำดับ</th><th>Clients</th></tr></thead>
-              <tbody>${uniqueClients.slice(0, 25).map((c, i) => `<tr><td style="text-align: center;">${i + 1}</td><td>${c}</td></tr>`).join('')}</tbody>
-            </table>
-            <table class="split-table">
-              <thead><tr><th style="width: 50px;">ลำดับ</th><th>Clients</th></tr></thead>
-              <tbody>${uniqueClients.slice(25, 50).map((c, i) => `<tr><td style="text-align: center;">${i + 26}</td><td>${c}</td></tr>`).join('')}</tbody>
-            </table>
-          </div>
-          <div class="footer-logo">${logoImgTagFooter}</div>
-        </div>
+        <!-- DYNAMIC MULTI-PAGE DEVICES -->
+        ${clientPagesHTML}
 
         <!-- PAGES 5+: GROUPED ACCESS AUDIT LOGS -->
         ${auditPages.map((pageRows, pageIdx) => `
