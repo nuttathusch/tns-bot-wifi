@@ -1,6 +1,6 @@
 /**
  * BOT Wi-Fi Monthly Usage Report Dashboard Client JS & Full 26-Page Booklet Engine
- * AUTOMATIC 100% ZYXEL NEBULA OPENAPI FETCH ENGINE (DYNAMIC UNIQUE AUDIT LOGS PER MONTH)
+ * MULTI-MONTH LOG FILE ANALYZER & DYNAMIC MONTHLY REPORT GENERATOR
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,6 +11,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginPassword = document.getElementById('loginPassword');
   const loginErrorMsg = document.getElementById('loginErrorMsg');
   const btnLogout = document.getElementById('btnLogout');
+
+  // Mode Tabs & Control Panels
+  const navTabUpload = document.getElementById('navTabUpload');
+  const navTabApi = document.getElementById('navTabApi');
+  const uploadMenuSection = document.getElementById('uploadMenuSection');
+  const apiMenuSection = document.getElementById('apiMenuSection');
+
+  // Multi-Month Analysis UI Elements
+  const fileAnalysisBanner = document.getElementById('fileAnalysisBanner');
+  const bannerFileName = document.getElementById('bannerFileName');
+  const bannerFileStats = document.getElementById('bannerFileStats');
+  const monthlyTabsContainer = document.getElementById('monthlyTabsContainer');
+  const monthlyButtonsList = document.getElementById('monthlyButtonsList');
 
   // Dashboard DOM Elements
   const dropzone = document.getElementById('dropzone');
@@ -34,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentReportData = null;
   let chartDailyTrendInstance = null;
   let chartAPInstance = null;
+  let currentUploadedMultiMonthResult = null;
 
   // --- 1. LOGIN SYSTEM VALIDATION ---
   function checkAuthSession() {
@@ -69,6 +83,35 @@ document.addEventListener('DOMContentLoaded', () => {
       loginUsername.value = '';
       loginPassword.value = '';
       loginModal.style.display = 'flex';
+    });
+  }
+
+  // --- MODE TAB NAVIGATION HANDLERS ---
+  if (navTabUpload && navTabApi) {
+    navTabUpload.addEventListener('click', () => {
+      navTabUpload.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #2b6cb0 100%)';
+      navTabUpload.style.color = '#ffffff';
+      navTabUpload.className = 'btn';
+
+      navTabApi.style.background = 'transparent';
+      navTabApi.style.color = '#2b6cb0';
+      navTabApi.className = 'btn btn-outline';
+
+      uploadMenuSection.classList.remove('hidden');
+      apiMenuSection.classList.add('hidden');
+    });
+
+    navTabApi.addEventListener('click', () => {
+      navTabApi.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #2b6cb0 100%)';
+      navTabApi.style.color = '#ffffff';
+      navTabApi.className = 'btn';
+
+      navTabUpload.style.background = 'transparent';
+      navTabUpload.style.color = '#2b6cb0';
+      navTabUpload.className = 'btn btn-outline';
+
+      apiMenuSection.classList.remove('hidden');
+      uploadMenuSection.classList.add('hidden');
     });
   }
 
@@ -416,42 +459,83 @@ document.addEventListener('DOMContentLoaded', () => {
     generateClientExcel(currentReportData).finally(() => showLoading(false));
   });
 
+  /**
+   * Main File Upload Engine: Reads client file and analyzes multi-month reports!
+   */
   async function uploadFile(file) {
     showLoading(true);
-    const formData = new FormData();
-    formData.append('logfile', file);
-
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          currentReportData = result.report;
-          renderDashboard(result.report);
-          return;
-        }
+      const result = await parseFileClientSideMultiMonth(file);
+      currentUploadedMultiMonthResult = result;
+
+      // Update File Analysis Banner
+      if (fileAnalysisBanner && bannerFileName && bannerFileStats) {
+        fileAnalysisBanner.classList.remove('hidden');
+        bannerFileName.textContent = `✅ อ่านและวิเคราะห์ไฟล์ ${file.name} สำเร็จ!`;
+        bannerFileStats.textContent = `พบข้อมูลล็อกทั้งหมด ${result.totalRows.toLocaleString()} รายการ แยกวิเคราะห์รายงานสรุปได้ ${result.sortedMonthKeys.length} เดือน (${result.sortedMonthKeys[0]} ถึง ${result.sortedMonthKeys[result.sortedMonthKeys.length - 1]})`;
       }
-      throw new Error('Server upload unavailable');
+
+      // Render Monthly Button Pills Bar
+      if (monthlyTabsContainer && monthlyButtonsList) {
+        monthlyTabsContainer.classList.remove('hidden');
+        monthlyButtonsList.innerHTML = '';
+
+        result.sortedMonthKeys.forEach((mKey, idx) => {
+          const rep = result.reportsMap.get(mKey);
+          const thaiMonthYear = rep.metadata.thaiMonthYear.replace('ประจำเดือน', '').trim();
+          const btn = document.createElement('button');
+
+          // Highlight the latest month by default
+          const isSelected = (idx === result.sortedMonthKeys.length - 1);
+          btn.className = isSelected ? 'btn btn-primary' : 'btn btn-outline';
+          btn.style.fontSize = '13px';
+          btn.style.padding = '8px 16px';
+          btn.style.borderRadius = '20px';
+          btn.style.fontWeight = '600';
+          if (!isSelected) {
+            btn.style.background = '#ffffff';
+            btn.style.color = '#1e3a8a';
+            btn.style.borderColor = '#cbd5e1';
+          }
+
+          btn.innerHTML = `📅 ${thaiMonthYear} <span class="badge" style="background:rgba(0,0,0,0.08); padding: 2px 6px; border-radius:10px; margin-left:4px; font-size:11px;">${rep.clientList.length} แถว</span>`;
+
+          btn.addEventListener('click', () => {
+            monthlyButtonsList.querySelectorAll('button').forEach(b => {
+              b.className = 'btn btn-outline';
+              b.style.background = '#ffffff';
+              b.style.color = '#1e3a8a';
+              b.style.borderColor = '#cbd5e1';
+            });
+            btn.className = 'btn btn-primary';
+            btn.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #2b6cb0 100%)';
+            btn.style.color = '#ffffff';
+
+            currentReportData = rep;
+            renderDashboard(rep);
+          });
+
+          monthlyButtonsList.appendChild(btn);
+        });
+      }
+
+      // Render the latest month by default
+      const latestMonthKey = result.sortedMonthKeys[result.sortedMonthKeys.length - 1];
+      const latestReport = result.reportsMap.get(latestMonthKey);
+      currentReportData = latestReport;
+      renderDashboard(latestReport);
+
     } catch (err) {
-      try {
-        const parsedReport = await parseFileClientSide(file, selectMonth ? selectMonth.value : null);
-        currentReportData = parsedReport;
-        renderDashboard(parsedReport);
-      } catch (parseErr) {
-        alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Log: ' + parseErr.message);
-      }
+      alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Log: ' + err.message);
     } finally {
       showLoading(false);
     }
   }
 
   /**
-   * Client-side Parser for Real Uploaded Log Files (CSV, XLSX, XLS)
+   * Client-side Parser for Real Uploaded Log Files (CSV, XLSX, XLS) Supporting Multi-Month
    */
-  async function parseFileClientSide(file, filterMonth = null) {
+  async function parseFileClientSideMultiMonth(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
@@ -466,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!rows || rows.length === 0) {
               return reject(new Error('ไฟล์ที่อัปโหลดไม่มีข้อมูล'));
             }
-            resolve(analyzeRowsClientSide(rows, filterMonth));
+            resolve(analyzeMultiMonthRowsClientSide(rows, file.name));
           } catch (err) {
             reject(err);
           }
@@ -484,7 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!parsed.data || parsed.data.length === 0) {
               return reject(new Error('ไฟล์ CSV ที่อัปโหลดไม่มีข้อมูล'));
             }
-            resolve(analyzeRowsClientSide(parsed.data, filterMonth));
+            resolve(analyzeMultiMonthRowsClientSide(parsed.data, file.name));
           } catch (err) {
             reject(err);
           }
@@ -494,7 +578,55 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function analyzeRowsClientSide(rows, filterMonth = null) {
+  function analyzeMultiMonthRowsClientSide(rows, fileName = '') {
+    const monthRowsMap = new Map();
+
+    rows.forEach(row => {
+      const firstConnectedStr = getFieldValue(row, ['First Connected', 'Connected Date', 'Login Time', 'Start Time', 'Date', 'Time', 'Timestamp']) || '';
+      let mKey = '';
+      if (firstConnectedStr) {
+        const d = new Date(firstConnectedStr);
+        if (!isNaN(d.getTime())) {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          mKey = `${y}-${m}`;
+        }
+      }
+      if (!mKey) {
+        const msg = getFieldValue(row, ['Message', 'Event', 'Description', 'Detail', 'Log Message']) || '';
+        const mMatch = msg.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+        if (mMatch) {
+          mKey = `${mMatch[1]}-${String(mMatch[2]).padStart(2, '0')}`;
+        }
+      }
+      if (!mKey) {
+        mKey = '2026-08';
+      }
+
+      if (!monthRowsMap.has(mKey)) {
+        monthRowsMap.set(mKey, []);
+      }
+      monthRowsMap.get(mKey).push(row);
+    });
+
+    const sortedMonthKeys = Array.from(monthRowsMap.keys()).sort();
+    const reportsMap = new Map();
+
+    sortedMonthKeys.forEach(mKey => {
+      const monthRows = monthRowsMap.get(mKey);
+      const rep = analyzeRowsClientSide(monthRows, mKey, fileName);
+      reportsMap.set(mKey, rep);
+    });
+
+    return {
+      fileName,
+      totalRows: rows.length,
+      sortedMonthKeys,
+      reportsMap
+    };
+  }
+
+  function analyzeRowsClientSide(rows, filterMonth = null, fileName = '') {
     const clientsMap = new Map();
     const voucherMap = new Map();
     const dailyMap = new Map();
@@ -662,7 +794,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     return {
       metadata: {
-        source: 'Real Uploaded Log File Parsing',
+        source: fileName ? `วิเคราะห์จากไฟล์ที่อัปโหลด (${fileName})` : 'Real Uploaded Log File Parsing',
         generatedAt: new Date().toISOString(),
         detectedMonth: detectedMonth || '2026-08',
         thaiMonthYear,

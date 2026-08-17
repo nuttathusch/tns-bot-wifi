@@ -151,8 +151,58 @@
   <!-- MAIN CONTAINER -->
   <main class="main-container">
 
-    <!-- OPENAPI KEY INPUT CARD -->
-    <section class="card" style="margin-bottom: 24px;">
+    <!-- MODE SWITCH MENU TABS -->
+    <div class="card" style="margin-bottom: 20px; padding: 12px 18px; background: #f8fafc;">
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <button id="navTabUpload" class="btn" style="background: linear-gradient(135deg, #1e3a8a 0%, #2b6cb0 100%); color: #ffffff; font-weight: 700;">
+          📂 เมนูอัปโหลดไฟล์ Log จริงเพื่อวิเคราะห์ข้อมูลแยกรายเดือน
+        </button>
+        <button id="navTabApi" class="btn btn-outline" style="font-weight: 600; color: #2b6cb0; border-color: #2b6cb0;">
+          ⚡ ดึงข้อมูลตรงจาก Zyxel Nebula OpenAPI
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN FILE UPLOAD & ANALYZER MENU CARD -->
+    <section id="uploadMenuSection" class="card upload-section" style="margin-bottom: 24px;">
+      <div class="dropzone" id="dropzone" style="padding: 28px 20px;">
+        <div class="dropzone-icon" style="font-size: 42px; margin-bottom: 10px;">📂</div>
+        <h2 style="font-size: 18px; color: #1e293b; font-weight: 700; margin-bottom: 6px;">อัปโหลดไฟล์ Log จริงเพื่อเริ่มประมวลผลและวิเคราะห์แยกรายเดือน</h2>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 16px; max-width: 680px; margin-left: auto; margin-right: auto;">
+          รองรับไฟล์ Log จริง (.csv, .xlsx, .xls) ที่ Export จาก Zyxel Nebula Cloud (สามารถอัปโหลดไฟล์ที่มีข้อมูลหลายเดือนรวมกัน หรือไฟล์เดี่ยวได้ ระบบจะแยกวิเคราะห์และสร้างเล่มรายงานสรุปของทุกๆ เดือนให้อัตโนมัติ)
+        </p>
+        <div class="dropzone-actions">
+          <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" hidden>
+          <button class="btn btn-primary" style="font-size: 14px; padding: 12px 24px; box-shadow: 0 4px 14px rgba(43, 108, 176, 0.35);" onclick="document.getElementById('fileInput').click()">
+            📁 เลือกไฟล์ Log จากเครื่องเพื่อวิเคราะห์ข้อมูล
+          </button>
+        </div>
+      </div>
+
+      <!-- FILE ANALYSIS SUMMARY BANNER (DYNAMICALLY SHOWN AFTER UPLOAD) -->
+      <div id="fileAnalysisBanner" class="hidden" style="margin-top: 20px; padding: 16px 20px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h4 style="color: #166534; font-size: 15px; font-weight: 700; margin-bottom: 4px;" id="bannerFileName">✅ วิเคราะห์ไฟล์ Log สำเร็จ</h4>
+            <p style="color: #15803d; font-size: 13px;" id="bannerFileStats">พบข้อมูลทั้งหมด 0 รายการ สรุปรายงานย้อนหลังได้ 0 เดือน</p>
+          </div>
+          <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="document.getElementById('fileInput').click()">🔄 อัปโหลดไฟล์อื่นเพิ่มเติม</button>
+        </div>
+      </div>
+
+      <!-- DYNAMIC MONTHLY SELECTOR BUTTONS / TABS BAR -->
+      <div id="monthlyTabsContainer" class="hidden" style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+        <div style="font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+          <span>📅 เมนูปุ่มกดเลือกดูรายงานสรุปแต่ละเดือนที่วิเคราะห์ได้จากไฟล์:</span>
+        </div>
+        <div id="monthlyButtonsList" style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <!-- Dynamically generated month buttons e.g. [📅 มิ.ย. 2568] [📅 ก.ค. 2568] ... -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ZYXEL OPENAPI SYNC MENU CARD (TOGGLED VIA NAV TAB) -->
+    <section id="apiMenuSection" class="card hidden" style="margin-bottom: 24px;">
       <div class="card-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
         <h3>🔑 ดึงข้อมูลจาก Zyxel Nebula API จริง (Live API Sync)</h3>
       </div>
@@ -179,19 +229,6 @@
         </button>
       </div>
       <div id="apiStatusMessage" style="margin-top: 10px; font-size: 13px; font-weight: 600;"></div>
-    </section>
-
-    <!-- DROPZONE OPTIONAL EXTRA UPLOAD -->
-    <section class="card upload-section" style="margin-bottom: 24px;">
-      <div class="dropzone" id="dropzone" style="padding: 16px 20px;">
-        <div class="dropzone-icon" style="font-size: 24px; margin-bottom: 6px;">📂</div>
-        <h2 style="font-size: 14px; color: #2d3748; margin-bottom: 4px;">⚡ ระบบดึงข้อมูลจาก Zyxel Nebula OpenAPI โดยตรงเรียบร้อยแล้ว (ไม่จำเป็นต้องอัปโหลดไฟล์)</h2>
-        <p style="font-size: 12px; color: #718096; margin-bottom: 10px;">ท่านสามารถเลือกเดือนที่ต้องการสรุปจาก Dropdown ด้านบน หรือลากวางไฟล์ Log (.csv / .xlsx) สำรองเพื่อประมวลผลเพิ่มเติมได้ที่นี่</p>
-        <div class="dropzone-actions">
-          <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" hidden>
-          <button class="btn btn-outline" style="font-size: 12px; padding: 6px 14px;" onclick="document.getElementById('fileInput').click()">📁 เลือกไฟล์ Log สำรองเพิ่มเติม (ไม่บังคับ)</button>
-        </div>
-      </div>
     </section>
 
     <!-- DASHBOARD RESULTS SECTION -->
