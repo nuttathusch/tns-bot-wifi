@@ -10,9 +10,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Chart.js & ExcelJS CDN for Client-side GitHub Pages Support -->
+  <!-- Chart.js & ExcelJS CDN for Client-side Support -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <link rel="stylesheet" href="css/style.css">
   <style>
@@ -40,17 +42,6 @@
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
       border: 1px solid rgba(255, 255, 255, 0.3);
       text-align: center;
-    }
-    .login-logo {
-      background: #008299;
-      color: #ffffff;
-      font-family: 'Prompt', sans-serif;
-      font-weight: 800;
-      font-size: 22px;
-      padding: 8px 18px;
-      border-radius: 8px;
-      display: inline-block;
-      margin-bottom: 20px;
     }
     .login-title {
       font-size: 20px;
@@ -152,7 +143,6 @@
         </div>
       </div>
       <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
-        <button id="btnSampleDataHeader" class="btn btn-secondary">📂 โหลดข้อมูลตัวอย่าง (Sample Data)</button>
         <button id="btnLogout" class="btn" style="background: #e53e3e; color: #fff; padding: 8px 14px; font-size: 12px;">🔒 ออกจากระบบ</button>
       </div>
     </div>
@@ -164,7 +154,7 @@
     <!-- OPENAPI KEY INPUT CARD -->
     <section class="card" style="margin-bottom: 24px;">
       <div class="card-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
-        <h3>🔑 ตั้งค่า Zyxel Nebula OpenAPI Connection (ดึงข้อมูลผ่าน API)</h3>
+        <h3>🔑 ดึงข้อมูลจาก Zyxel Nebula API จริง (Live API Sync)</h3>
       </div>
       <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
         <input type="text" id="apiTokenInput" class="search-input" style="flex: 1; min-width: 240px;" placeholder="กรอก API Token (เช่น AULtShTXkkke41C2FX)" value="AULtShTXkkke41C2FX">
@@ -185,7 +175,7 @@
         </select>
 
         <button id="btnTestAPI" class="btn" style="background: #2b6cb0; color: #fff;">
-          ⚡ ดึงข้อมูลและสร้างรายงานผ่าน API (Sync & Generate Report)
+          ⚡ ดึงข้อมูลและสร้างรายงานจาก API จริง
         </button>
       </div>
       <div id="apiStatusMessage" style="margin-top: 10px; font-size: 13px; font-weight: 600;"></div>
@@ -195,12 +185,11 @@
     <section class="card upload-section">
       <div class="dropzone" id="dropzone">
         <div class="dropzone-icon">📁</div>
-        <h2>โหมด 1-Click Upload: ลากวางหรือคลิกเพื่ออัปโหลดไฟล์ Log</h2>
-        <p>รองรับไฟล์ Log ทั้งหมดจาก Zyxel Nebula Cloud Networking (.csv, .xlsx, .xls)</p>
+        <h2>อัปโหลดไฟล์ Log จริง: ลากวางหรือคลิกเพื่อเลือกไฟล์ Log</h2>
+        <p>รองรับไฟล์ Log จริงที่ Export จาก Zyxel Nebula Cloud Networking (.csv, .xlsx, .xls)</p>
         <div class="dropzone-actions">
           <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" hidden>
-          <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">เลือกไฟล์ Log จากเครื่อง</button>
-          <button id="btnSampleData" class="btn btn-secondary">⚡ ใช้ข้อมูลตัวอย่าง BOT</button>
+          <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📁 เลือกไฟล์ Log จากเครื่องเพื่อประมวลผลข้อมูลจริง</button>
         </div>
       </div>
     </section>
