@@ -68,8 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnLogout) {
     btnLogout.addEventListener('click', () => {
       sessionStorage.removeItem('bot_wifi_authed');
-      loginUsername.value = 'tns';
-      loginPassword.value = 'tnsbotwifi';
+      loginUsername.value = '';
+      loginPassword.value = '';
       loginModal.style.display = 'flex';
     });
   }
